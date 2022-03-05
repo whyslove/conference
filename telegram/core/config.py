@@ -6,6 +6,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 class Settings(BaseSettings):
     WEBHOOK_URL: str
     TELEGRAM_SECRET: str
+    DB_PATH: str
 
     class Config:
         env_file = "./telegram/.env"

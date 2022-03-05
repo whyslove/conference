@@ -4,3 +4,6 @@ fastapi==0.73.0
 loguru==0.6.0
 pydantic==1.9.0
 uvicorn==0.17.4
+sqlalchemy~=1.4.25
+python-dotenv~=0.19.1
+asyncpg~=0.25.0

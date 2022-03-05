@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: db
+    image: postgres
+    environment:
+      POSTGRES_USER: conf
+      POSTGRES_PASSWORD: conf_pass
+      POSTGRES_DB: conf_db
+    ports:
+      - 5433:5432
+    restart: unless-stopped

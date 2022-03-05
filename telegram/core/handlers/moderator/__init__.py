@@ -1,2 +1,24 @@
-def setup(arg):
-    pass
+from cgitb import text
+from aiogram import Dispatcher
+from loguru import logger
+from . import moderator_handlers
+import re
+
+
+def setup(dp: Dispatcher):
+    """Function for recursivly register dispatchers
+
+    Args:
+        dp (Dispatcher)
+    """
+    logger.debug("Start moderator handler dispatcher")
+    dp.register_message_handler(
+        moderator_handlers.start_enter_token, regexp=re.compile("ввести токен", re.IGNORECASE)
+    )
+    dp.register_message_handler(moderator_handlers.use_token, state="enter_token")
+    dp.register_message_handler(moderator_handlers.start_enter_token, state="enter_email")
+    dp.register_message_handler(
+        moderator_handlers.prepare_upload_csv, text="Загрузить расписание", state="moderator_main"
+    )
+    dp.register_message_handler(moderator_handlers.upload_csv, state="ready_upload_csv")
+    logger.debug("End moderator handler dispatcher")

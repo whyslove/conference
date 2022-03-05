@@ -7,6 +7,8 @@ from loguru import logger
 from core.config import config
 from core.keyboards.all_keyboards import all_keyboards
 
+from core.database.repositories import token
+
 
 async def ask_email(message: types.Message, state: FSMContext):
     """
@@ -21,7 +23,7 @@ async def ask_email(message: types.Message, state: FSMContext):
     # FIXME add db check
     # TODO send email on email to condirm identity
     # role = anser.from.db(email)
-    role = "guest"
+    role = "moderator"
     match role:
         case "moderator":
             logger.debug("Finally it is moderator")

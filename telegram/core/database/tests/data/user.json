@@ -1,0 +1,598 @@
+[{
+  "snp": "metus sapien ut",
+  "phone": "+57 (283) 691-8256"
+}, {
+  "uid": "sem mauris",
+  "snp": "iaculis diam erat",
+  "phone": "+27 (806) 474-8703",
+  "is_admin": false,
+  "tg_chat_id": 123456789
+}, {
+  "uid": null,
+  "snp": "ante ipsum primis",
+  "phone": "+353 (586) 185-2855",
+  "is_admin": false,
+  "tg_chat_id": 637130304
+}, {
+  "uid": null,
+  "snp": "tristique in tempus",
+  "phone": "+31 (819) 890-7349",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "vel est donec",
+  "phone": "+66 (919) 783-4837",
+  "is_admin": null,
+  "tg_chat_id": null
+}, {
+  "uid": "aenean auctor gravida",
+  "snp": "donec semper sapien",
+  "phone": "+63 (497) 225-8853",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "aliquet maecenas leo odio",
+  "snp": "in leo maecenas",
+  "phone": "+1 (702) 944-1301",
+  "is_admin": false,
+  "tg_chat_id": 122020547
+}, {
+  "uid": "porttitor lacus at",
+  "snp": "bibendum felis sed",
+  "phone": "+62 (778) 365-5220",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "nec euismod scelerisque",
+  "phone": "+7 (774) 525-2597",
+  "is_admin": false,
+  "tg_chat_id": 590197634
+}, {
+  "uid": "etiam justo",
+  "snp": "nisi volutpat eleifend",
+  "phone": "+33 (523) 270-3747",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "amet eleifend",
+  "snp": "duis ac nibh",
+  "phone": "+33 (191) 154-4351",
+  "is_admin": false,
+  "tg_chat_id": 531256910
+}, {
+  "uid": null,
+  "snp": "mauris ullamcorper purus",
+  "phone": "+46 (427) 408-4293",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "amet nunc viverra",
+  "snp": "duis aliquam convallis",
+  "phone": "+46 (529) 757-3509",
+  "is_admin": false,
+  "tg_chat_id": 721478160
+}, {
+  "uid": null,
+  "snp": "eu mi nulla",
+  "phone": "+380 (822) 337-0111",
+  "is_admin": false,
+  "tg_chat_id": 357545691
+}, {
+  "uid": null,
+  "snp": "penatibus et magnis",
+  "phone": "+62 (129) 648-0404",
+  "is_admin": true,
+  "tg_chat_id": 958687783
+}, {
+  "uid": "quisque porta volutpat erat",
+  "snp": "nisl venenatis lacinia",
+  "phone": "+63 (999) 539-4623",
+  "is_admin": true,
+  "tg_chat_id": 991540771
+}, {
+  "uid": null,
+  "snp": "mus vivamus vestibulum",
+  "phone": "+976 (119) 749-6438",
+  "is_admin": false,
+  "tg_chat_id": 537918044
+}, {
+  "uid": "sapien quis libero nullam",
+  "snp": "vulputate justo in",
+  "phone": "+385 (476) 628-9075",
+  "is_admin": false,
+  "tg_chat_id": 199974004
+}, {
+  "uid": "nisi",
+  "snp": "at nulla suspendisse",
+  "phone": "+54 (183) 916-0559",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "egestas metus aenean",
+  "phone": "+84 (469) 595-0225",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "velit eu est congue",
+  "snp": "lobortis convallis tortor",
+  "phone": "+33 (778) 265-7515",
+  "is_admin": true,
+  "tg_chat_id": 865120762
+}, {
+  "uid": "dapibus augue vel accumsan",
+  "snp": "vel ipsum praesent",
+  "phone": "+46 (850) 773-9715",
+  "is_admin": null,
+  "tg_chat_id": 138436757
+}, {
+  "uid": null,
+  "snp": "nonummy maecenas tincidunt",
+  "phone": "+62 (456) 303-0095",
+  "is_admin": false,
+  "tg_chat_id": 949195151
+}, {
+  "uid": "in consequat ut",
+  "snp": "velit eu est",
+  "phone": "+92 (805) 747-4637",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "nulla tempus vivamus",
+  "snp": "eget orci vehicula",
+  "phone": "+255 (160) 112-1432",
+  "is_admin": false,
+  "tg_chat_id": 385684815
+}, {
+  "uid": "adipiscing",
+  "snp": "vehicula consequat morbi",
+  "phone": "+598 (636) 588-7133",
+  "is_admin": null,
+  "tg_chat_id": 688186132
+}, {
+  "uid": null,
+  "snp": "posuere cubilia curae",
+  "phone": "+62 (636) 721-2028",
+  "is_admin": false,
+  "tg_chat_id": 222153768
+}, {
+  "uid": null,
+  "snp": "ultrices aliquet maecenas",
+  "phone": "+86 (184) 389-7150",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "odio elementum",
+  "snp": "leo maecenas pulvinar",
+  "phone": "+971 (149) 328-6554",
+  "is_admin": true,
+  "tg_chat_id": 417515176
+}, {
+  "uid": null,
+  "snp": "orci luctus et",
+  "phone": "+86 (955) 570-9788",
+  "is_admin": false,
+  "tg_chat_id": 342134437
+}, {
+  "uid": "volutpat in congue etiam",
+  "snp": "tortor quis turpis",
+  "phone": "+1 (907) 487-7581",
+  "is_admin": false,
+  "tg_chat_id": 911921275
+}, {
+  "uid": null,
+  "snp": "a suscipit nulla",
+  "phone": "+86 (814) 634-8251",
+  "is_admin": null,
+  "tg_chat_id": 703587486
+}, {
+  "uid": "ornare imperdiet",
+  "snp": "nisl nunc rhoncus",
+  "phone": "+225 (932) 507-9439",
+  "is_admin": null,
+  "tg_chat_id": 326344562
+}, {
+  "uid": null,
+  "snp": "accumsan tortor quis",
+  "phone": "+86 (488) 292-1154",
+  "is_admin": true,
+  "tg_chat_id": 317332601
+}, {
+  "uid": null,
+  "snp": "sed justo pellentesque",
+  "phone": "+7 (794) 741-5663",
+  "is_admin": true,
+  "tg_chat_id": 594577952
+}, {
+  "uid": null,
+  "snp": "ultricies eu nibh",
+  "phone": "+358 (863) 522-1709",
+  "is_admin": null,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "suscipit nulla elit",
+  "phone": "+86 (418) 130-9611",
+  "is_admin": false,
+  "tg_chat_id": 997564272
+}, {
+  "uid": "primis",
+  "snp": "blandit ultrices enim",
+  "phone": "+1 (915) 200-3994",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "sapien sapien non",
+  "snp": "in lacus curabitur",
+  "phone": "+62 (583) 142-4250",
+  "is_admin": true,
+  "tg_chat_id": 885797699
+}, {
+  "uid": null,
+  "snp": "nascetur ridiculus mus",
+  "phone": "+57 (910) 528-8476",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "id mauris vulputate",
+  "phone": "+386 (500) 914-6190",
+  "is_admin": true,
+  "tg_chat_id": 898641077
+}, {
+  "uid": null,
+  "snp": "elit ac nulla",
+  "phone": "+86 (699) 448-0778",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "donec odio justo",
+  "snp": "velit nec nisi",
+  "phone": "+57 (446) 198-9754",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "ullamcorper purus sit",
+  "snp": "cursus vestibulum proin",
+  "phone": "+591 (640) 305-3413",
+  "is_admin": true,
+  "tg_chat_id": 906553740
+}, {
+  "uid": "ante nulla justo",
+  "snp": "mauris enim leo",
+  "phone": "+81 (730) 936-7680",
+  "is_admin": null,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "mattis odio donec",
+  "phone": "+351 (861) 850-6010",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "neque duis bibendum morbi",
+  "snp": "mattis nibh ligula",
+  "phone": "+63 (509) 217-6030",
+  "is_admin": false,
+  "tg_chat_id": 472854512
+}, {
+  "uid": "interdum in ante",
+  "snp": "faucibus accumsan odio",
+  "phone": "+7 (437) 354-7656",
+  "is_admin": true,
+  "tg_chat_id": 420465694
+}, {
+  "uid": null,
+  "snp": "proin interdum mauris",
+  "phone": "+48 (853) 310-2533",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "mi",
+  "snp": "sapien dignissim vestibulum",
+  "phone": "+420 (923) 158-9868",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "et",
+  "snp": "nulla suspendisse potenti",
+  "phone": "+86 (239) 853-0056",
+  "is_admin": false,
+  "tg_chat_id": 551799181
+}, {
+  "uid": "at",
+  "snp": "rutrum nulla tellus",
+  "phone": "+48 (230) 629-3611",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "id pretium iaculis",
+  "phone": "+351 (502) 932-3987",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "neque aenean auctor gravida",
+  "snp": "rutrum nulla nunc",
+  "phone": "+385 (674) 594-4205",
+  "is_admin": false,
+  "tg_chat_id": 448062678
+}, {
+  "uid": "ut odio",
+  "snp": "orci luctus et",
+  "phone": "+86 (750) 216-0318",
+  "is_admin": false,
+  "tg_chat_id": 795285421
+}, {
+  "uid": "volutpat in congue",
+  "snp": "fusce posuere felis",
+  "phone": "+63 (449) 951-5124",
+  "is_admin": null,
+  "tg_chat_id": 850200012
+}, {
+  "uid": null,
+  "snp": "convallis morbi odio",
+  "phone": "+20 (353) 925-6884",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "commodo placerat praesent",
+  "phone": "+57 (263) 513-9429",
+  "is_admin": true,
+  "tg_chat_id": 428871055
+}, {
+  "uid": "libero",
+  "snp": "felis ut at",
+  "phone": "+1 (313) 872-7532",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "cras in purus",
+  "phone": "+34 (792) 541-3985",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "rhoncus aliquet",
+  "snp": "elit ac nulla",
+  "phone": "+63 (936) 633-7639",
+  "is_admin": null,
+  "tg_chat_id": 718686201
+}, {
+  "uid": "odio",
+  "snp": "id massa id",
+  "phone": "+62 (401) 507-6199",
+  "is_admin": true,
+  "tg_chat_id": 809570971
+}, {
+  "uid": "mi pede malesuada in",
+  "snp": "cubilia curae nulla",
+  "phone": "+673 (941) 317-7645",
+  "is_admin": null,
+  "tg_chat_id": 149591876
+}, {
+  "uid": null,
+  "snp": "ultrices phasellus id",
+  "phone": "+62 (721) 642-0095",
+  "is_admin": null,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "parturient montes nascetur",
+  "phone": "+33 (934) 754-7629",
+  "is_admin": null,
+  "tg_chat_id": 110140481
+}, {
+  "uid": "sapien varius ut blandit",
+  "snp": "vivamus metus arcu",
+  "phone": "+62 (216) 196-2103",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "turpis enim blandit",
+  "phone": "+86 (856) 721-4850",
+  "is_admin": true,
+  "tg_chat_id": 195997726
+}, {
+  "uid": "consectetuer",
+  "snp": "commodo vulputate justo",
+  "phone": "+62 (801) 447-8365",
+  "is_admin": null,
+  "tg_chat_id": 563511101
+}, {
+  "uid": null,
+  "snp": "nunc purus phasellus",
+  "phone": "+62 (669) 150-9911",
+  "is_admin": false,
+  "tg_chat_id": 160709905
+}, {
+  "uid": null,
+  "snp": "orci luctus et",
+  "phone": "+46 (555) 802-6850",
+  "is_admin": true,
+  "tg_chat_id": 337145814
+}, {
+  "uid": "arcu libero",
+  "snp": "et magnis dis",
+  "phone": "+86 (751) 972-3202",
+  "is_admin": false,
+  "tg_chat_id": 949765922
+}, {
+  "uid": "sapien",
+  "snp": "convallis duis consequat",
+  "phone": "+1 (859) 584-1636",
+  "is_admin": false,
+  "tg_chat_id": 961456618
+}, {
+  "uid": null,
+  "snp": "ligula vehicula consequat",
+  "phone": "+48 (761) 106-6493",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "velit vivamus vel",
+  "phone": "+86 (527) 215-1631",
+  "is_admin": true,
+  "tg_chat_id": 650476451
+}, {
+  "uid": null,
+  "snp": "vestibulum proin eu",
+  "phone": "+380 (205) 581-9014",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "est",
+  "snp": "auctor gravida sem",
+  "phone": "+86 (711) 438-0821",
+  "is_admin": true,
+  "tg_chat_id": 737295310
+}, {
+  "uid": null,
+  "snp": "augue vestibulum rutrum",
+  "phone": "+63 (844) 125-6681",
+  "is_admin": true,
+  "tg_chat_id": 625758410
+}, {
+  "uid": "sagittis nam congue risus",
+  "snp": "dui proin leo",
+  "phone": "+64 (193) 628-7767",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": "maecenas",
+  "snp": "velit vivamus vel",
+  "phone": "+66 (641) 707-8581",
+  "is_admin": false,
+  "tg_chat_id": 403880833
+}, {
+  "uid": null,
+  "snp": "vel lectus in",
+  "phone": "+86 (539) 236-5278",
+  "is_admin": false,
+  "tg_chat_id": 156595908
+}, {
+  "uid": null,
+  "snp": "eget tincidunt eget",
+  "phone": "+92 (803) 138-0432",
+  "is_admin": true,
+  "tg_chat_id": 580079810
+}, {
+  "uid": null,
+  "snp": "convallis nunc proin",
+  "phone": "+56 (785) 995-5616",
+  "is_admin": true,
+  "tg_chat_id": 515622347
+}, {
+  "uid": null,
+  "snp": "eleifend luctus ultricies",
+  "phone": "+48 (597) 840-8395",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "vestibulum proin eu",
+  "phone": "+63 (834) 468-6445",
+  "is_admin": false,
+  "tg_chat_id": 453271522
+}, {
+  "uid": "risus dapibus augue",
+  "snp": "amet eros suspendisse",
+  "phone": "+261 (703) 657-3998",
+  "is_admin": true,
+  "tg_chat_id": 441473644
+}, {
+  "uid": "risus",
+  "snp": "bibendum morbi non",
+  "phone": "+47 (197) 993-4601",
+  "is_admin": false,
+  "tg_chat_id": 887540402
+}, {
+  "uid": null,
+  "snp": "id lobortis convallis",
+  "phone": "+81 (242) 214-6657",
+  "is_admin": true,
+  "tg_chat_id": 628759020
+}, {
+  "uid": "aliquam",
+  "snp": "dolor morbi vel",
+  "phone": "+976 (870) 738-8990",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "posuere cubilia curae",
+  "phone": "+86 (593) 506-7886",
+  "is_admin": null,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "in felis eu",
+  "phone": "+86 (488) 618-4250",
+  "is_admin": true,
+  "tg_chat_id": null
+}, {
+  "uid": null,
+  "snp": "orci luctus et",
+  "phone": "+62 (513) 791-0983",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "morbi",
+  "snp": "congue elementum in",
+  "phone": "+63 (155) 734-7488",
+  "is_admin": false,
+  "tg_chat_id": 497674299
+}, {
+  "uid": "suscipit ligula in lacus",
+  "snp": "mauris laoreet ut",
+  "phone": "+351 (168) 984-1394",
+  "is_admin": true,
+  "tg_chat_id": 776818081
+}, {
+  "uid": null,
+  "snp": "est phasellus sit",
+  "phone": "+380 (346) 867-6810",
+  "is_admin": false,
+  "tg_chat_id": 773506732
+}, {
+  "uid": "blandit",
+  "snp": "in eleifend quam",
+  "phone": "+375 (856) 333-7275",
+  "is_admin": false,
+  "tg_chat_id": 613277355
+}, {
+  "uid": null,
+  "snp": "ultrices aliquet maecenas",
+  "phone": "+62 (798) 575-3703",
+  "is_admin": true,
+  "tg_chat_id": 297941988
+}, {
+  "uid": null,
+  "snp": "eget nunc donec",
+  "phone": "+380 (701) 155-8738",
+  "is_admin": false,
+  "tg_chat_id": null
+}, {
+  "uid": "tortor",
+  "snp": "sit amet sapien",
+  "phone": "+242 (199) 461-9567",
+  "is_admin": false,
+  "tg_chat_id": 350116406
+}, {
+  "uid": null,
+  "snp": "nunc viverra dapibus",
+  "phone": "+30 (279) 421-1324",
+  "is_admin": true,
+  "tg_chat_id": 133232956
+}, {
+  "uid": null,
+  "snp": "in quis justo",
+  "phone": "+504 (961) 670-7830",
+  "is_admin": false,
+  "tg_chat_id": null
+}]

@@ -31,7 +31,9 @@ def kb_moderator_menu():
     kb_moderator.add(
         KeyboardButton("Общее расписание"),
         KeyboardButton("Ответы участников"),
+        KeyboardButton("Загрузить расписание"),
     )
+    return kb_moderator
 
 
 def kb_moderator_answers():
