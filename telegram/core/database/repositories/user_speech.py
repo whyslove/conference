@@ -2,16 +2,16 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.expression import select, delete
 from typing import Optional, List, Union
 
-from create_table import UserSpeech, User, Speech, Role
+from ..create_table import UserSpeech, User, Speech, Role
 
 
 class UserSpeechRepository:
-
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self, uid='', key='', role='',
-                      acknowledgment: Optional[str] = '') -> List[Optional[dict]]:
+    async def get_all(
+        self, uid="", key="", role="", acknowledgment: Optional[str] = ""
+    ) -> List[Optional[dict]]:
         """The function of getting all user_speeches from the UserSpeech table.
 
         :param uid: unique id
@@ -33,32 +33,34 @@ class UserSpeechRepository:
 
         query = select(UserSpeech)
 
-        if uid != '':
+        if uid != "":
             query = query.where(UserSpeech.uid == uid)
 
-        if key != '':
+        if key != "":
             query = query.where(UserSpeech.key == key)
 
-        if role != '':
+        if role != "":
             query = query.where(UserSpeech.role == role)
 
-        if acknowledgment != '':
+        if acknowledgment != "":
             query = query.where(UserSpeech.acknowledgment == acknowledgment)
 
         user_speeches = [
             {
-                'uid_key': user_speech.uid_key,
-                'uid': user_speech.uid,
-                'key': user_speech.key,
-                'role': user_speech.role,
-                'acknowledgment': user_speech.acknowledgment
-            } for user_speech in (await self.session.execute(query)).scalars()
+                "uid_key": user_speech.uid_key,
+                "uid": user_speech.uid,
+                "key": user_speech.key,
+                "role": user_speech.role,
+                "acknowledgment": user_speech.acknowledgment,
+            }
+            for user_speech in (await self.session.execute(query)).scalars()
         ]
 
         return user_speeches
 
-    async def get_one(self, uid='', key='', role='',
-                      acknowledgment: Optional[str] = '') -> Optional[dict]:
+    async def get_one(
+        self, uid="", key="", role="", acknowledgment: Optional[str] = ""
+    ) -> Optional[dict]:
         """The function of getting one user_speech from the UserSpeech table.
 
         :param uid: unique id
@@ -79,18 +81,14 @@ class UserSpeechRepository:
         """
 
         user_speeches = await self.get_all(
-            uid=uid,
-            key=key,
-            role=role,
-            acknowledgment=acknowledgment
+            uid=uid, key=key, role=role, acknowledgment=acknowledgment
         )
 
         if user_speeches and user_speeches[0]:
             return user_speeches[0]
         return None
 
-    async def delete(self, uid='', key='', role='',
-                     acknowledgment: Optional[str] = '') -> None:
+    async def delete(self, uid="", key="", role="", acknowledgment: Optional[str] = "") -> None:
         """The function of deleting user_speeches from the UserSpeech table.
 
         :param uid: unique id
@@ -112,16 +110,16 @@ class UserSpeechRepository:
 
         query = delete(UserSpeech)
 
-        if uid != '':
+        if uid != "":
             query = query.where(UserSpeech.uid == uid)
 
-        if key != '':
+        if key != "":
             query = query.where(UserSpeech.key == key)
 
-        if role != '':
+        if role != "":
             query = query.where(UserSpeech.role == role)
 
-        if acknowledgment != '':
+        if acknowledgment != "":
             query = query.where(UserSpeech.acknowledgment == acknowledgment)
 
         await self.session.execute(query)
@@ -143,8 +141,9 @@ class UserSpeechRepository:
         query = select(UserSpeech).distinct()
         uids = {user_speech.uid for user_speech in (await self.session.execute(query)).scalars()}
         keys = {user_speech.key for user_speech in (await self.session.execute(query)).scalars()}
-        uids_keys = {user_speech.uid_key for user_speech in
-                     (await self.session.execute(query)).scalars()}
+        uids_keys = {
+            user_speech.uid_key for user_speech in (await self.session.execute(query)).scalars()
+        }
 
         query = select(User).distinct()
         user_uids = {user.uid for user in (await self.session.execute(query)).scalars()}
@@ -161,53 +160,64 @@ class UserSpeechRepository:
         for user_speech in user_speeches:
             params = {}
 
-            if 'uid' in user_speech.keys():
-                if user_speech['uid'] not in user_uids:
-                    raise ValueError(f'Unable to add new user_speech '
-                                     f'because user with this '
-                                     f'uid="{user_speech["uid"]}" does not exist')
+            if "uid" in user_speech.keys():
+                if user_speech["uid"] not in user_uids:
+                    raise ValueError(
+                        f"Unable to add new user_speech "
+                        f"because user with this "
+                        f'uid="{user_speech["uid"]}" does not exist'
+                    )
             else:
-                raise ValueError(f'Unable to add new user_speech '
-                                 f'because a parameter "uid" does not exist.')
+                raise ValueError(
+                    f"Unable to add new user_speech " f'because a parameter "uid" does not exist.'
+                )
 
-            if 'key' in user_speech.keys():
-                if user_speech['key'] not in speech_keys:
-                    raise ValueError(f'Unable to add new user_speech '
-                                     f'because speech with this '
-                                     f'key="{user_speech["key"]}" does not exist')
+            if "key" in user_speech.keys():
+                if user_speech["key"] not in speech_keys:
+                    raise ValueError(
+                        f"Unable to add new user_speech "
+                        f"because speech with this "
+                        f'key="{user_speech["key"]}" does not exist'
+                    )
             else:
-                raise ValueError(f'Unable to add new user_speech '
-                                 f'because a parameter "key" does not exist.')
+                raise ValueError(
+                    f"Unable to add new user_speech " f'because a parameter "key" does not exist.'
+                )
 
             if f'{user_speech["uid"]}_{user_speech["key"]}' in uids_keys:
-                raise ValueError(f'Unable to add new user_speech with parameters '
-                                 f'uid="{user_speech["uid"]}" and '
-                                 f'key="{user_speech["key"]}" '
-                                 f'because this uid and key already exist.')
+                raise ValueError(
+                    f"Unable to add new user_speech with parameters "
+                    f'uid="{user_speech["uid"]}" and '
+                    f'key="{user_speech["key"]}" '
+                    f"because this uid and key already exist."
+                )
 
-            params['uid_key'] = f'{user_speech["uid"]}_{user_speech["key"]}'
-            params['uid'] = user_speech['uid']
-            params['key'] = user_speech['key']
+            params["uid_key"] = f'{user_speech["uid"]}_{user_speech["key"]}'
+            params["uid"] = user_speech["uid"]
+            params["key"] = user_speech["key"]
             uids_keys.add(f'{user_speech["uid"]}_{user_speech["key"]}')
 
-            if 'role' in user_speech.keys():
-                if user_speech['role'] not in role_values:
-                    raise ValueError(f'Unable to add new user_speech '
-                                     f'because role with this '
-                                     f'value="{user_speech["role"]}" does not exist')
-                params['role'] = user_speech['role']
+            if "role" in user_speech.keys():
+                if user_speech["role"] not in role_values:
+                    raise ValueError(
+                        f"Unable to add new user_speech "
+                        f"because role with this "
+                        f'value="{user_speech["role"]}" does not exist'
+                    )
+                params["role"] = user_speech["role"]
             else:
-                raise ValueError(f'Unable to add new user_speech '
-                                 f'because a parameter "role" does not exist.')
+                raise ValueError(
+                    f"Unable to add new user_speech " f'because a parameter "role" does not exist.'
+                )
 
-            if 'acknowledgment' in user_speech.keys():
-                params['acknowledgment'] = user_speech['acknowledgment']
+            if "acknowledgment" in user_speech.keys():
+                params["acknowledgment"] = user_speech["acknowledgment"]
             else:
-                params['acknowledgment'] = None
+                params["acknowledgment"] = None
 
             self.session.add(UserSpeech(**params))
-            uids.add(params['uid'])
-            keys.add(params['key'])
+            uids.add(params["uid"])
+            keys.add(params["key"])
 
             await self.session.commit()
             return_user_speeches.append(params)
@@ -217,9 +227,17 @@ class UserSpeechRepository:
 
         return return_user_speeches
 
-    async def update(self, uid='', key='', role='', acknowledgment: Optional[str] = '',
-                     new_uid='', new_key='', new_role='',
-                     new_acknowledgment: Optional[str] = '') -> None:
+    async def update(
+        self,
+        uid="",
+        key="",
+        role="",
+        acknowledgment: Optional[str] = "",
+        new_uid="",
+        new_key="",
+        new_role="",
+        new_acknowledgment: Optional[str] = "",
+    ) -> None:
         """The function of updating user_speeches in the UserSpeech table.
 
         :param uid: unique id
@@ -254,20 +272,20 @@ class UserSpeechRepository:
         params = dict()
         query = select(UserSpeech)
 
-        if uid != '':
-            params['uid'] = uid
+        if uid != "":
+            params["uid"] = uid
             query = query.where(UserSpeech.uid == uid)
 
-        if key != '':
-            params['key'] = key
+        if key != "":
+            params["key"] = key
             query = query.where(UserSpeech.key == key)
 
-        if role != '':
-            params['role'] = role
+        if role != "":
+            params["role"] = role
             query = query.where(UserSpeech.role == role)
 
-        if acknowledgment != '':
-            params['acknowledgment'] = acknowledgment
+        if acknowledgment != "":
+            params["acknowledgment"] = acknowledgment
             query = query.where(UserSpeech.acknowledgment == acknowledgment)
 
         if not params:
@@ -278,8 +296,9 @@ class UserSpeechRepository:
         query = select(UserSpeech).distinct()
         uids = {user_speech.uid for user_speech in (await self.session.execute(query)).scalars()}
         keys = {user_speech.key for user_speech in (await self.session.execute(query)).scalars()}
-        uids_keys = {user_speech.uid_key for user_speech in
-                     (await self.session.execute(query)).scalars()}
+        uids_keys = {
+            user_speech.uid_key for user_speech in (await self.session.execute(query)).scalars()
+        }
 
         query = select(User).distinct()
         user_uids = {user.uid for user in (await self.session.execute(query)).scalars()}
@@ -289,69 +308,85 @@ class UserSpeechRepository:
         role_values = {role.value for role in (await self.session.execute(query)).scalars()}
 
         for user_speech in user_speeches:
-            if new_uid != '' and new_key != '':
+            if new_uid != "" and new_key != "":
                 if new_uid not in user_uids:
-                    raise ValueError(f'Unable to update the value in user_speech '
-                                     f'because user with this '
-                                     f'uid="{new_uid}" does not exist.')
+                    raise ValueError(
+                        f"Unable to update the value in user_speech "
+                        f"because user with this "
+                        f'uid="{new_uid}" does not exist.'
+                    )
                 if new_key not in speech_keys:
-                    raise ValueError(f'Unable to update the value in user_speech '
-                                     f'because speech with this '
-                                     f'key="{new_key}" does not exist.')
-                if f'{new_uid}_{new_key}' in uids_keys:
-                    raise ValueError(f'Unable to update the values in user_speech '
-                                     f'because user_speech with this '
-                                     f'uid="{new_uid}" and '
-                                     f'key="{new_key}" already exists.')
+                    raise ValueError(
+                        f"Unable to update the value in user_speech "
+                        f"because speech with this "
+                        f'key="{new_key}" does not exist.'
+                    )
+                if f"{new_uid}_{new_key}" in uids_keys:
+                    raise ValueError(
+                        f"Unable to update the values in user_speech "
+                        f"because user_speech with this "
+                        f'uid="{new_uid}" and '
+                        f'key="{new_key}" already exists.'
+                    )
                 uids_keys.remove(user_speech.uid_key)
-                user_speech.uid_key = f'{new_uid}_{new_key}'
+                user_speech.uid_key = f"{new_uid}_{new_key}"
                 user_speech.uid = new_uid
                 user_speech.key = new_key
                 uids_keys.add(user_speech.uid_key)
 
-            elif new_uid != '':
+            elif new_uid != "":
                 if new_uid in user_uids:
-                    if f'{new_uid}_{user_speech.key}' not in uids_keys:
+                    if f"{new_uid}_{user_speech.key}" not in uids_keys:
                         uids_keys.remove(user_speech.uid_key)
-                        user_speech.uid_key = f'{new_uid}_{user_speech.key}'
+                        user_speech.uid_key = f"{new_uid}_{user_speech.key}"
                         user_speech.uid = new_uid
                         uids_keys.add(user_speech.uid_key)
                     else:
-                        raise ValueError(f'Unable to update the values in user_speech '
-                                         f'because user_speech with this '
-                                         f'uid="{new_uid}" and '
-                                         f'key="{user_speech.key}" already exists.')
+                        raise ValueError(
+                            f"Unable to update the values in user_speech "
+                            f"because user_speech with this "
+                            f'uid="{new_uid}" and '
+                            f'key="{user_speech.key}" already exists.'
+                        )
                 else:
-                    raise ValueError(f'Unable to update the value in user_speech '
-                                     f'because user with this '
-                                     f'uid="{new_uid}" does not exist.')
+                    raise ValueError(
+                        f"Unable to update the value in user_speech "
+                        f"because user with this "
+                        f'uid="{new_uid}" does not exist.'
+                    )
 
-            elif new_key != '':
+            elif new_key != "":
                 if new_key in speech_keys:
-                    if f'{user_speech.uid}_{new_key}' not in uids_keys:
+                    if f"{user_speech.uid}_{new_key}" not in uids_keys:
                         uids_keys.remove(user_speech.uid_key)
-                        user_speech.uid_key = f'{user_speech.uid}_{new_key}'
+                        user_speech.uid_key = f"{user_speech.uid}_{new_key}"
                         user_speech.key = new_key
                         uids_keys.add(user_speech.uid_key)
                     else:
-                        raise ValueError(f'Unable to update the values in user_speech '
-                                         f'because user_speech with this '
-                                         f'uid="{new_uid}" and '
-                                         f'key="{user_speech.key}" already exists.')
+                        raise ValueError(
+                            f"Unable to update the values in user_speech "
+                            f"because user_speech with this "
+                            f'uid="{new_uid}" and '
+                            f'key="{user_speech.key}" already exists.'
+                        )
                 else:
-                    raise ValueError(f'Unable to update the value in user_speech '
-                                     f'because speech with this '
-                                     f'key="{new_key}" does not exist.')
+                    raise ValueError(
+                        f"Unable to update the value in user_speech "
+                        f"because speech with this "
+                        f'key="{new_key}" does not exist.'
+                    )
 
-            if new_role != '':
+            if new_role != "":
                 if new_role in role_values:
                     user_speech.role = new_role
                 else:
-                    raise ValueError(f'Unable to update the value in user_speech '
-                                     f'because role with this '
-                                     f'value="{new_role}" does not exist.')
+                    raise ValueError(
+                        f"Unable to update the value in user_speech "
+                        f"because role with this "
+                        f'value="{new_role}" does not exist.'
+                    )
 
-            if new_acknowledgment != '':
+            if new_acknowledgment != "":
                 user_speech.acknowledgment = new_acknowledgment
 
             await self.session.commit()

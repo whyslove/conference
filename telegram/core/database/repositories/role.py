@@ -2,15 +2,14 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.expression import select, delete
 from typing import Optional, List, Union
 
-from create_table import Role
+from ..create_table import Role
 
 
 class RoleRepository:
-
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self, value='') -> List[Optional[dict]]:
+    async def get_all(self, value="") -> List[Optional[dict]]:
         """The function of getting all roles from the Role table.
 
         :param value: person's role name
@@ -23,18 +22,14 @@ class RoleRepository:
 
         query = select(Role)
 
-        if value != '':
+        if value != "":
             query = query.where(Role.value == value)
 
-        roles = [
-            {
-                'value': role.value
-            } for role in (await self.session.execute(query)).scalars()
-        ]
+        roles = [{"value": role.value} for role in (await self.session.execute(query)).scalars()]
 
         return roles
 
-    async def get_one(self, value='') -> Optional[dict]:
+    async def get_one(self, value="") -> Optional[dict]:
         """The function of getting one role from the Role table.
 
         :param value: person's role name
@@ -45,15 +40,13 @@ class RoleRepository:
 
         """
 
-        roles = await self.get_all(
-            value=value
-        )
+        roles = await self.get_all(value=value)
 
         if roles and roles[0]:
             return roles[0]
         return None
 
-    async def delete(self, value='') -> None:
+    async def delete(self, value="") -> None:
         """The function of deleting roles from the Role table.
 
         :param value: person's role name
@@ -66,7 +59,7 @@ class RoleRepository:
 
         query = delete(Role)
 
-        if value != '':
+        if value != "":
             query = query.where(Role.value == value)
 
         await self.session.execute(query)
@@ -96,18 +89,21 @@ class RoleRepository:
         for role in roles:
             params = {}
 
-            if 'value' in role.keys():
-                if role['value'] in values:
-                    raise ValueError(f'Unable to add new role with parameter '
-                                     f'value="{role["value"]}" '
-                                     f'because this value already exists.')
-                params['value'] = role['value']
+            if "value" in role.keys():
+                if role["value"] in values:
+                    raise ValueError(
+                        f"Unable to add new role with parameter "
+                        f'value="{role["value"]}" '
+                        f"because this value already exists."
+                    )
+                params["value"] = role["value"]
             else:
-                raise ValueError(f'Unable to add new role '
-                                 f'because a parameter "value" does not exist.')
+                raise ValueError(
+                    f"Unable to add new role " f'because a parameter "value" does not exist.'
+                )
 
             self.session.add(Role(**params))
-            values.add(params['value'])
+            values.add(params["value"])
 
             await self.session.commit()
             return_roles.append(params)
@@ -117,7 +113,7 @@ class RoleRepository:
 
         return return_roles
 
-    async def update(self, value='', new_value='') -> None:
+    async def update(self, value="", new_value="") -> None:
         """The function of updating roles in the Role table.
 
         :param value: person's role name
@@ -134,8 +130,8 @@ class RoleRepository:
         params = dict()
         query = select(Role)
 
-        if value != '':
-            params['value'] = value
+        if value != "":
+            params["value"] = value
             query = query.where(Role.value == value)
 
         if not params:
@@ -147,14 +143,16 @@ class RoleRepository:
         values = {role.value for role in (await self.session.execute(query)).scalars()}
 
         for role in roles:
-            if new_value != '':
+            if new_value != "":
                 if new_value not in values:
                     values.remove(role.value)
                     role.value = new_value
                     values.add(new_value)
                 else:
-                    ValueError(f'Unable to update the value in role '
-                               f'because role with this '
-                               f'value="{new_value}" already exists.')
+                    ValueError(
+                        f"Unable to update the value in role "
+                        f"because role with this "
+                        f'value="{new_value}" already exists.'
+                    )
 
             await self.session.commit()

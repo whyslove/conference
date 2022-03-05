@@ -18,7 +18,9 @@ def setup(dp: Dispatcher):
     dp.register_message_handler(moderator_handlers.use_token, state="enter_token")
     dp.register_message_handler(moderator_handlers.start_enter_token, state="enter_email")
     dp.register_message_handler(
-        moderator_handlers.prepare_upload_csv, text="Загрузить расписание", state="moderator_main"
+        moderator_handlers.prepare_upload_xls, text="Загрузить расписание", state="moderator_main"
     )
-    dp.register_message_handler(moderator_handlers.upload_csv, state="ready_upload_csv")
+    dp.register_message_handler(
+        moderator_handlers.upload_xls, state="ready_upload_xls", content_types=["document"]
+    )
     logger.debug("End moderator handler dispatcher")
