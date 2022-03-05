@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from core.config import config
 from core.config import bot, dp
 from core import handlers
+from core import filters
 
 
 app = FastAPI()
@@ -18,6 +19,7 @@ WEBHOK_PATH = "/bot"
 async def on_startup():
     """Initializes filters, middlewares, hadlers and webhook."""
     await bot.set_webhook(url=config.WEBHOOK_URL + WEBHOK_PATH)
+    filters.setup(dp)
     handlers.setup(dp)
 
 
@@ -43,4 +45,4 @@ async def on_shutdown():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=80)
