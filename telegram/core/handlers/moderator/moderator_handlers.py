@@ -3,6 +3,9 @@ from tkinter.tix import Tree
 from pydantic import SecretStr
 from core.database.repositories import token, user
 from core.database.create_table import SessionLocal
+from core.database.repositories.speech import SpeechRepository
+from core.utils.reminder import ModeratorReminder
+from core import config
 from loguru import logger
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
@@ -77,6 +80,14 @@ async def upload_xls(message: types.Message, state: FSMContext):
         error = await parse_xlsx(dest_dir + "/" + file_name)
         if error == None:
             await message.answer("Файл успешно загружен")
+            # set reminder to moderator
+            logger.debug(f"Setting reminds for moderator {message.from_user}")
+            session = SessionLocal()
+            speech_repo = SpeechRepository(session)
+            for event in await speech_repo.get_all():
+                reminder = ModeratorReminder(message.from_user.id, event)
+                config.sc.add_remind(reminder)
+            logger.debug(f"Reminds for moderator {message.from_user} set successfully")
         else:
             await message.answer(error)
             return

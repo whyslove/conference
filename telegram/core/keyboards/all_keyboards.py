@@ -52,19 +52,19 @@ def kb_moderator_answers():
 
 def kb_add_event(id: str):
     kb_event = InlineKeyboardMarkup()
-    kb_event.add(InlineKeyboardButton(text="Добавить", callback_data="add" + id))
+    kb_event.add(InlineKeyboardButton(text="Добавить", callback_data="add:" + id))
     return kb_event
 
 
 def kb_remove_event(id: str):
     kb_event = InlineKeyboardMarkup()
-    kb_event.add(InlineKeyboardButton(text="Убрать", callback_data="removeEvent" + id))
+    kb_event.add(InlineKeyboardButton(text="Убрать", callback_data="removeGuest:" + id))
     return kb_event
 
 
-def kb_remove_speech(id: str):
+def kb_remove_speaker(id: str):
     kb_speech = InlineKeyboardMarkup()
-    kb_speech.add(InlineKeyboardButton(text="Отказаться", callback_data="removeSpeech" + id))
+    kb_speech.add(InlineKeyboardButton(text="Отказаться", callback_data="removeSpeaker:" + id))
     return kb_speech
 
 
@@ -74,4 +74,4 @@ all_keyboards["moderator_menu"] = kb_moderator_menu
 all_keyboards["moderator_answers"] = kb_moderator_answers
 all_keyboards["add_event"] = kb_add_event
 all_keyboards["remove_event"] = kb_remove_event
-all_keyboards["remove_speech"] = kb_remove_speech
+all_keyboards["remove_speaker"] = kb_remove_speaker

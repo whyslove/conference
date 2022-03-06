@@ -1,9 +1,14 @@
 """Module to illustrate personal schedule."""
 
+from datetime import datetime, timedelta
 from aiogram import types
 from click import option
 from loguru import logger
 from core.keyboards.all_keyboards import all_keyboards
+from core.database.repositories.speech import SpeechRepository
+from core.database.create_table import SessionLocal
+from core.database.repositories.user_speech import UserSpeechRepository
+from core.database.repositories.user import UserRepository
 
 
 async def personal_schedule(message: types.Message):
@@ -24,21 +29,33 @@ async def show_personal_schedule_today(message: types.Message):
     """
     logger.debug(f"In show personal schedule for today for guest {message.from_user}")
     await message.answer("Расписание на сегодня")
-    # TODO get personal schedule and answer with delay
-    event_name = "Python0"
-    begin_date = "01.01.2020 13:00"
-    end_date = "01.01.2020 14:00"
-    field = "МЕМ"
-    description = "Оч крутое мероприятие"
-    await message.answer(
-        f"""Мероприятие: {event_name}
-    Начало: {begin_date}
-    Конец: {end_date}
-    Место: {field}
-    Описание: {description}
-    Пойдешь?""",
-        reply_markup=all_keyboards["remove_event"]("1315"),
-    )
+    session = SessionLocal()
+    user_speech_repo = UserSpeechRepository(session)
+    user_repo = UserRepository(session)
+    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            if event["start_time"].date() == datetime.today().date():
+                title = event["title"]
+                begin_date = event["start_time"]
+                end_date = event["end_time"]
+                venue = event["venue"]
+                venue_description = event["venue_description"]
+                await message.answer(
+                    f"""Мероприятие: {title}
+                Начало: {begin_date}
+                Конец: {end_date}
+                Место: {venue}
+                Описание: {venue_description}
+                Пойдешь?""",
+                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
+    await session.close()
 
 
 async def show_personal_schedule_tomorrow(message: types.Message):
@@ -49,21 +66,33 @@ async def show_personal_schedule_tomorrow(message: types.Message):
     """
     logger.debug(f"In show personal schedule for tomorrow for guest {message.from_user}")
     await message.answer("Расписание на завтра")
-    # TODO get personal schedule and answer with delay
-    event_name = "Python1"
-    begin_date = "01.01.2020 13:00"
-    end_date = "01.01.2020 14:00"
-    field = "МЕМ"
-    description = "Оч крутое мероприятие"
-    await message.answer(
-        f"""Мероприятие: {event_name}
-    Начало: {begin_date}
-    Конец: {end_date}
-    Место: {field}
-    Описание: {description}
-    Пойдешь?""",
-        reply_markup=all_keyboards["remove_event"]("1315"),
-    )
+    session = SessionLocal()
+    user_speech_repo = UserSpeechRepository(session)
+    user_repo = UserRepository(session)
+    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            if event["start_time"].date() == datetime.today().date() + timedelta(days=1):
+                title = event["title"]
+                begin_date = event["start_time"]
+                end_date = event["end_time"]
+                venue = event["venue"]
+                venue_description = event["venue_description"]
+                await message.answer(
+                    f"""Мероприятие: {title}
+                Начало: {begin_date}
+                Конец: {end_date}
+                Место: {venue}
+                Описание: {venue_description}
+                Пойдешь?""",
+                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
+    await session.close()
 
 
 async def show_personal_schedule_all(message: types.Message):
@@ -74,21 +103,32 @@ async def show_personal_schedule_all(message: types.Message):
     """
     logger.debug(f"In show all personal schedule for guest {message.from_user}")
     await message.answer("Расписание за весь период")
-    # TODO get personal schedule and answer with delay
-    event_name = "Python3"
-    begin_date = "01.01.2020 13:00"
-    end_date = "01.01.2020 14:00"
-    field = "МЕМ"
-    description = "Оч крутое мероприятие"
-    await message.answer(
-        f"""Мероприятие: {event_name}
-    Начало: {begin_date}
-    Конец: {end_date}
-    Место: {field}
-    Описание: {description}
-    Пойдешь?""",
-        reply_markup=all_keyboards["remove_event"]("1315"),
-    )
+    session = SessionLocal()
+    user_speech_repo = UserSpeechRepository(session)
+    user_repo = UserRepository(session)
+    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            title = event["title"]
+            begin_date = event["start_time"]
+            end_date = event["end_time"]
+            venue = event["venue"]
+            venue_description = event["venue_description"]
+            await message.answer(
+                f"""Мероприятие: {title}
+            Начало: {begin_date}
+            Конец: {end_date}
+            Место: {venue}
+            Описание: {venue_description}
+            Пойдешь?""",
+                reply_markup=all_keyboards["remove_event"](event["key"]),
+            )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
+    await session.close()
 
 
 async def show_personal_speech(message: types.Message):
@@ -98,23 +138,33 @@ async def show_personal_speech(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In show personal speech schedule for guest {message.from_user}")
-    # TODO get personal schedule for speech and answer with delay
     await message.answer("Мои выступления")
-    # TODO get personal schedule and answer with delay
-    event_name = "PythonSpeech"
-    begin_date = "01.01.2020 13:00"
-    end_date = "01.01.2020 14:00"
-    field = "МЕМ"
-    description = "Оч крутое мероприятие"
-    await message.answer(
-        f"""Мероприятие: {event_name}
-    Начало: {begin_date}
-    Конец: {end_date}
-    Место: {field}
-    Описание: {description}
-    Пойдешь?""",
-        reply_markup=all_keyboards["remove_speech"]("1315"),
-    )
+    session = SessionLocal()
+    user_speech_repo = UserSpeechRepository(session)
+    user_repo = UserRepository(session)
+    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="1")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            title = event["title"]
+            begin_date = event["start_time"]
+            end_date = event["end_time"]
+            venue = event["venue"]
+            venue_description = event["venue_description"]
+            await message.answer(
+                f"""Мероприятие: {title}
+            Начало: {begin_date}
+            Конец: {end_date}
+            Место: {venue}
+            Описание: {venue_description}
+            Пойдешь?""",
+                reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
+    await session.close()
 
 
 async def return_main_menu(message: types.Message):

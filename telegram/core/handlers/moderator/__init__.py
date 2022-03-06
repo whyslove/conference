@@ -2,6 +2,8 @@ from cgitb import text
 from aiogram import Dispatcher
 from loguru import logger
 from . import moderator_handlers
+from .general_schedule import general_schedule
+from .show_responses import show_responses
 import re
 
 
@@ -28,4 +30,6 @@ def setup(dp: Dispatcher):
     dp.register_message_handler(
         moderator_handlers.upload_xls, state="ready_upload_xls", content_types=["document"]
     )
+    dp.register_message_handler(general_schedule, regexp="Общее расписание", state="moderator_main")
+    dp.register_message_handler(show_responses, regexp="Ответы участников", state="moderator_main")
     logger.debug("End moderator handler dispatcher")
