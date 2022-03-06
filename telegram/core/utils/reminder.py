@@ -6,7 +6,6 @@ from typing import Dict
 from aiogram import Dispatcher
 from abc import ABC
 from loguru import logger
-from core import config
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.base import JobLookupError
 from core.database.create_table import SessionLocal
