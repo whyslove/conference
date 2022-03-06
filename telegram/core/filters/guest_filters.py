@@ -1,5 +1,4 @@
 """Module to declare guest filters."""
-import re
 from loguru import logger
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
@@ -23,6 +22,6 @@ class CallBackFilter(BoundFilter):
         :rtype: str
         """
         logger.debug(f"Full callback name: {callback.data}")
-        callback_status = re.findall("[a-zA-Z]+", callback.data)[0]
+        callback_status = callback.data.split(":")[0]
         logger.debug(f"{callback_status}")
         return callback_status == self.status

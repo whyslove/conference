@@ -23,7 +23,8 @@ async def ask_email(message: types.Message, state: FSMContext):
     # FIXME add db check
     # TODO send email on email to condirm identity
     # role = anser.from.db(email)
-    role = "moderator"
+    role = "guest"
+    print(message.from_user.id)
     match role:
         case "moderator":
             logger.debug("Finally it is moderator")
