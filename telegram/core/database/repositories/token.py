@@ -32,16 +32,13 @@ class TokenRepository:
         if token != "":
             query = query.where(Token.token == token)
 
-        if uid != "":
-            query = query.where(Token.uid == uid)
-
         if vacant != "":
             if vacant is None:
                 vacant = True
             query = query.where(Token.vacant == vacant)
 
         tokens = [
-            {"token": token.token, "uid": token.uid, "vacant": token.vacant}
+            {"token": token.token, "vacant": token.vacant}
             for token in (await self.session.execute(query)).scalars()
         ]
 

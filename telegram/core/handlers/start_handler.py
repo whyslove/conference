@@ -27,11 +27,11 @@ async def check_email(message: types.Message, state: FSMContext):
         logger.info(f"unknown email f{message.text}")
         await message.answer("неправильный email, введите его ещё раз")
         return
-    if user_["is_admin"] == "1":
+    if user_["is_admin"]:
         role = "moderator"
     else:
         role = "guest"
-    ur.update(new_tg_chat_id=message.from_user.id)
+    await ur.update(uid=str.lower(message.text), new_tg_chat_id=message.from_user.id)
     match role:
         case "moderator":
             logger.debug("Finally it is moderator")

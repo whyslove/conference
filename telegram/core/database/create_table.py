@@ -128,9 +128,9 @@ class Token(Base):
     __tablename__ = "token"
 
     token = Column(String, primary_key=True)
-    uid = Column(
-        String, ForeignKey(User.uid, onupdate="cascade", ondelete="cascade"), nullable=False
-    )
+    # uid = Column(
+    #     String, ForeignKey(User.uid, onupdate="cascade", ondelete="cascade"), nullable=False
+    # )
     vacant = Column(Boolean, default=True, nullable=False)
 
 

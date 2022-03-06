@@ -22,8 +22,9 @@ async def use_token(message: types.Message, state: FSMContext):
     logger.debug(f"Token {message.text}")
     tr = token.TokenRepository(session=SessionLocal())
 
-    if await tr.get_one(token=message.text):
+    if await tr.get_one(token=message.text, vacant=True):
         await state.set_state("enter_email_for_token")
+        # await tr.update(token=message.text, new_vacant=False)
         await message.answer("Теперь введите вашу почту")
     else:
         await message.answer("Неправильный токен")
@@ -34,15 +35,22 @@ async def use_token(message: types.Message, state: FSMContext):
 async def enter_email_for_token(message: types.Message, state: FSMContext):
     logger.debug(f"Get email, {message.text}, try update")
     ur = user.UserRepository(session=SessionLocal())
+    if await ur.get_one(uid=message.text):  # if it existing user
+        ur.update(uid=message.text, new_is_admin=True)
+    else:  # if db is empty and it is false user
+        await ur.add(
+            {
+                "uid": message.text,
+                "is_admin": True,
+                "snp": "",
+                "phone": "",
+                "tg_chat_id": message.from_user.id,
+            }
+        )
+    await message.answer("Вы стали модератором")
+    await state.set_state("moderator_main")
+    await message.answer("Вот меню", reply_markup=all_keyboards["moderator_menu"]())
 
-    if await ur.get_one(uid=message.text):
-        await ur.update(uid=message.text, new_is_admin=True)
-        await message.answer("Вы стали модератором")
-        await state.set_state("moderator_main")
-        await message.answer("Вот меню", reply_markup=all_keyboards["moderator_menu"]())
-    else:
-        await message.answer("Такая почта не найдена")
-        await state.reset_state()
     ur.session.close()
 
 
