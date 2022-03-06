@@ -4,9 +4,11 @@ import shutil
 
 
 def clear_directory(directory_path: str):
-    import os
+    """Delete all direcotry
 
-    f = open("123.txt", "w")
+    Args:
+        directory_path (str): directory
+    """
     try:
         shutil.rmtree(directory_path)
     except OSError as e:

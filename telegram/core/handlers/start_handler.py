@@ -6,24 +6,32 @@ from aiogram.dispatcher.storage import FSMContext
 from loguru import logger
 from core.config import config
 from core.keyboards.all_keyboards import all_keyboards
-
+from core.database.repositories import token, user
+from core.database.create_table import SessionLocal
 from core.database.repositories import token
 
 
 async def ask_email(message: types.Message, state: FSMContext):
-    """
+    await message.answer("Введите email")
+    await state.set_state("need_enter_email")
 
-    :param message: Message instance
-    :type message: types.Message
-    :param state: FSMContext instance
-    :type state: FSMContext
-    """
-    logger.info(f"Receive message from tg {message}")
-    logger.debug(f"Searching email {message.text} in db")
-    # FIXME add db check
+
+async def check_email(message: types.Message, state: FSMContext):
+    """Asks email and if email exist assign special state according to its role. Then updates db with tg_chat_id"""
+
+    logger.info(f"Receive message from tg {message.text}")
+    ur = user.UserRepository(session=SessionLocal())
     # TODO send email on email to condirm identity
-    # role = anser.from.db(email)
-    role = "moderator"
+    user_ = await ur.get_one(uid=str.lower(message.text))
+    if not user_:
+        logger.info(f"unknown email f{message.text}")
+        await message.answer("неправильный email, введите его ещё раз")
+        return
+    if user_["is_admin"] == "1":
+        role = "moderator"
+    else:
+        role = "guest"
+    ur.update(new_tg_chat_id=message.from_user.id)
     match role:
         case "moderator":
             logger.debug("Finally it is moderator")
@@ -35,5 +43,5 @@ async def ask_email(message: types.Message, state: FSMContext):
             await message.answer("Вот меню", reply_markup=all_keyboards["guest_menu"]())
 
         case _:
-            logger.info(f"Unknown email f{message.text}")
-            await message.answer("Неправильный email, введите его ещё раз")
+            logger.info(f"unknown role f{message.text}")
+            await message.answer("неправильный email, введите его ещё раз")

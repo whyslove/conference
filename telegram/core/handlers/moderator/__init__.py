@@ -13,10 +13,15 @@ def setup(dp: Dispatcher):
     """
     logger.debug("Start moderator handler dispatcher")
     dp.register_message_handler(
-        moderator_handlers.start_enter_token, regexp=re.compile("ввести токен", re.IGNORECASE)
+        moderator_handlers.start_enter_token,
+        regexp=re.compile("ввести токен", re.IGNORECASE),
+        state="*",
     )
     dp.register_message_handler(moderator_handlers.use_token, state="enter_token")
     dp.register_message_handler(moderator_handlers.start_enter_token, state="enter_email")
+    dp.register_message_handler(
+        moderator_handlers.enter_email_for_token, state="enter_email_for_token"
+    )
     dp.register_message_handler(
         moderator_handlers.prepare_upload_xls, text="Загрузить расписание", state="moderator_main"
     )

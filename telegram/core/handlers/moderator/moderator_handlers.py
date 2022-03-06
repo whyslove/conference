@@ -8,6 +8,7 @@ from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
 from core.utils.utils import clear_directory
 from core.utils.parser_csv import parse_xlsx
+from core.keyboards.all_keyboards import all_keyboards
 
 
 async def start_enter_token(message: types.Message, state: FSMContext):
@@ -22,26 +23,32 @@ async def use_token(message: types.Message, state: FSMContext):
     tr = token.TokenRepository(session=SessionLocal())
 
     if await tr.get_one(token=message.text):
-        await state.set_state("enter_email")
+        await state.set_state("enter_email_for_token")
         await message.answer("Теперь введите вашу почту")
     else:
         await message.answer("Неправильный токен")
         await state.reset_state()
+    tr.session.close()
 
 
 async def enter_email_for_token(message: types.Message, state: FSMContext):
     logger.debug(f"Get email, {message.text}, try update")
     ur = user.UserRepository(session=SessionLocal())
-    if ur.get_one(uid=message.text):
+
+    if await ur.get_one(uid=message.text):
         await ur.update(uid=message.text, new_is_admin=True)
         await message.answer("Вы стали модератором")
         await state.set_state("moderator_main")
+        await message.answer("Вот меню", reply_markup=all_keyboards["moderator_menu"]())
     else:
         await message.answer("Такая почта не найдена")
         await state.reset_state()
+    ur.session.close()
 
 
 async def prepare_upload_xls(message: types.Message, state: FSMContext):
+    """Set appropriate state"""
+
     logger.debug("Prepare upload xls")
     await state.set_state("ready_upload_xls")
     await message.answer("Загрузите сюда файл .xls")
