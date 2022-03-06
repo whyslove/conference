@@ -14,4 +14,5 @@ def setup(dp: Dispatcher):
     guest.setup(dp)
     moderator.setup(dp)
     dp.register_message_handler(start_handler.ask_email, commands="start")
+    dp.register_message_handler(start_handler.check_email, state="need_enter_email")
     logger.debug("End base handler dispatcher")

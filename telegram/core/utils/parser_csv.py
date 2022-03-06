@@ -11,6 +11,14 @@ ROLE_SPEAKER = "1"
 
 
 async def parse_xlsx(full_path: str):
+    """Replace all database with info from this xlsx file
+
+    Args:
+        full_path (str): full path to xlsx file
+
+    Returns:
+        str: Error or None
+    """
 
     await delete_all_data_in_tables()
 
@@ -25,7 +33,7 @@ async def parse_xlsx(full_path: str):
     members_data = xlsx_obj["Участники"].values
     ur = user.UserRepository(session=SessionLocal())
     _ = next(members_data)  # skip title
-    for email, fio, phone, is_admin, *_ in members_data:  # if some white squares
+    for email, fio, phone, is_admin, *_ in members_data:  # *_ to store blank cells
         if not email:
             break
         try:
@@ -39,7 +47,7 @@ async def parse_xlsx(full_path: str):
     sr = speech.SpeechRepository(session=SessionLocal())
     usr = user_speech.UserSpeechRepository(session=SessionLocal())
     _ = next(event_data)  # skip title
-    for title, speakers, start, end, place, desc_place, *_ in event_data:  # if some white squares
+    for title, speakers, start, end, place, desc_place, *_ in event_data:  # *_ to store blank cells
         if not title:
             break
         try:
@@ -62,23 +70,26 @@ async def parse_xlsx(full_path: str):
 
 
 async def delete_all_data_in_tables():
-    ur = user.UserRepository(session=SessionLocal())
+    session = SessionLocal()
+
+    ur = user.UserRepository(session=session)
+    sr = speech.SpeechRepository(session=session)
+    usr = user_speech.UserSpeechRepository(session=session)
+    rr = role.RoleRepository(session=session)
+
     users = await ur.get_all()
     for _user in users:
         await ur.delete(**_user)
-    sr = speech.SpeechRepository(session=SessionLocal())
+
     speeches = await sr.get_all()
     for _spech in speeches:
         await sr.delete(**_spech)
-    usr = user_speech.UserSpeechRepository(session=SessionLocal())
+
     many_user_spech = await usr.get_all()
     for _user_spech in many_user_spech:
         await usr.delete(**_user_spech)
-    rr = role.RoleRepository(session=SessionLocal())
+
     await rr.delete(value=ROLE_GUEST)
     await rr.delete(value=ROLE_SPEAKER)
 
-    await rr.session.close()
-    await ur.session.close()
-    await sr.session.close()
-    await usr.session.close()
+    await session.close()
