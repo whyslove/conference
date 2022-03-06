@@ -23,32 +23,35 @@ async def general_schedule(message: types.Message, state: FSMContext):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
-    user_speech_list = await user_speech_repo.get_all(user["uid"])
-    previous_selected_list = [user_speech["key"] for user_speech in user_speech_list]
-    speech_repo = SpeechRepository(session)
-    for event in await speech_repo.get_all():
-        title = event["title"]
-        begin_date = event["start_time"]
-        end_date = event["end_time"]
-        venue = event["venue"]
-        venue_description = event["venue_description"]
-        selected = event["key"] in previous_selected_list
-        if not selected:
-            await message.answer(
-                f"""Мероприятие: {title}
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"])
+        previous_selected_list = [user_speech["key"] for user_speech in user_speech_list]
+        speech_repo = SpeechRepository(session)
+        for event in await speech_repo.get_all():
+            title = event["title"]
+            begin_date = event["start_time"]
+            end_date = event["end_time"]
+            venue = event["venue"]
+            venue_description = event["venue_description"]
+            selected = event["key"] in previous_selected_list
+            if not selected:
+                await message.answer(
+                    f"""Мероприятие: {title}
+            Начало: {begin_date}
+            Конец: {end_date}
+            Место: {venue}
+            Описание: {venue_description}""",
+                    reply_markup=all_keyboards["add_event"](event["key"]),
+                )
+            else:
+                await message.answer(
+                    f"""Мероприятие: {title}
         Начало: {begin_date}
         Конец: {end_date}
         Место: {venue}
-        Описание: {venue_description}""",
-                reply_markup=all_keyboards["add_event"](event["key"]),
-            )
-        else:
-            await message.answer(
-                f"""Мероприятие: {title}
-    Начало: {begin_date}
-    Конец: {end_date}
-    Место: {venue}
-    Описание: {venue_description}
-    Вы ранее записались на это мероприятие""",
-            )
+        Описание: {venue_description}
+        Вы ранее записались на это мероприятие""",
+                )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()

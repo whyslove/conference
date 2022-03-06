@@ -7,6 +7,7 @@ from .guest_schedule import (
     return_main_menu,
     show_personal_speech,
 )
+from .message_event_status import event_status_guest, event_status_speaker
 from .event_status import add_event, remove_event_guest, remove_event_speaker
 from core.filters.guest_filters import CallBackFilter
 from aiogram import Dispatcher
@@ -34,3 +35,5 @@ def setup(dp: Dispatcher):
     dp.register_callback_query_handler(
         remove_event_speaker, CallBackFilter("removeSpeaker"), state="guest_main"
     )
+    dp.register_message_handler(event_status_speaker, state="response_speaker")
+    dp.register_message_handler(event_status_guest, state="response_guest")

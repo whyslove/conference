@@ -33,25 +33,28 @@ async def show_personal_schedule_today(message: types.Message):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
-    user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
-    for user_speech in user_speech_list:
-        speech_repo = SpeechRepository(session=session)
-        event = await speech_repo.get_one(key=user_speech["key"])
-        if event["start_time"].date() == datetime.today().date():
-            title = event["title"]
-            begin_date = event["start_time"]
-            end_date = event["end_time"]
-            venue = event["venue"]
-            venue_description = event["venue_description"]
-            await message.answer(
-                f"""Мероприятие: {title}
-            Начало: {begin_date}
-            Конец: {end_date}
-            Место: {venue}
-            Описание: {venue_description}
-            Пойдешь?""",
-                reply_markup=all_keyboards["remove_event"](event["key"]),
-            )
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            if event["start_time"].date() == datetime.today().date():
+                title = event["title"]
+                begin_date = event["start_time"]
+                end_date = event["end_time"]
+                venue = event["venue"]
+                venue_description = event["venue_description"]
+                await message.answer(
+                    f"""Мероприятие: {title}
+                Начало: {begin_date}
+                Конец: {end_date}
+                Место: {venue}
+                Описание: {venue_description}
+                Пойдешь?""",
+                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
 
@@ -67,25 +70,28 @@ async def show_personal_schedule_tomorrow(message: types.Message):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
-    user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
-    for user_speech in user_speech_list:
-        speech_repo = SpeechRepository(session=session)
-        event = await speech_repo.get_one(key=user_speech["key"])
-        if event["start_time"].date() == datetime.today().date() + timedelta(days=1):
-            title = event["title"]
-            begin_date = event["start_time"]
-            end_date = event["end_time"]
-            venue = event["venue"]
-            venue_description = event["venue_description"]
-            await message.answer(
-                f"""Мероприятие: {title}
-            Начало: {begin_date}
-            Конец: {end_date}
-            Место: {venue}
-            Описание: {venue_description}
-            Пойдешь?""",
-                reply_markup=all_keyboards["remove_event"](event["key"]),
-            )
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            if event["start_time"].date() == datetime.today().date() + timedelta(days=1):
+                title = event["title"]
+                begin_date = event["start_time"]
+                end_date = event["end_time"]
+                venue = event["venue"]
+                venue_description = event["venue_description"]
+                await message.answer(
+                    f"""Мероприятие: {title}
+                Начало: {begin_date}
+                Конец: {end_date}
+                Место: {venue}
+                Описание: {venue_description}
+                Пойдешь?""",
+                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
 
@@ -101,24 +107,27 @@ async def show_personal_schedule_all(message: types.Message):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
-    user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
-    for user_speech in user_speech_list:
-        speech_repo = SpeechRepository(session=session)
-        event = await speech_repo.get_one(key=user_speech["key"])
-        title = event["title"]
-        begin_date = event["start_time"]
-        end_date = event["end_time"]
-        venue = event["venue"]
-        venue_description = event["venue_description"]
-        await message.answer(
-            f"""Мероприятие: {title}
-        Начало: {begin_date}
-        Конец: {end_date}
-        Место: {venue}
-        Описание: {venue_description}
-        Пойдешь?""",
-            reply_markup=all_keyboards["remove_event"](event["key"]),
-        )
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            title = event["title"]
+            begin_date = event["start_time"]
+            end_date = event["end_time"]
+            venue = event["venue"]
+            venue_description = event["venue_description"]
+            await message.answer(
+                f"""Мероприятие: {title}
+            Начало: {begin_date}
+            Конец: {end_date}
+            Место: {venue}
+            Описание: {venue_description}
+            Пойдешь?""",
+                reply_markup=all_keyboards["remove_event"](event["key"]),
+            )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
 
@@ -134,24 +143,27 @@ async def show_personal_speech(message: types.Message):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
-    user_speech_list = await user_speech_repo.get_all(user["uid"], role="1")
-    for user_speech in user_speech_list:
-        speech_repo = SpeechRepository(session=session)
-        event = await speech_repo.get_one(key=user_speech["key"])
-        title = event["title"]
-        begin_date = event["start_time"]
-        end_date = event["end_time"]
-        venue = event["venue"]
-        venue_description = event["venue_description"]
-        await message.answer(
-            f"""Мероприятие: {title}
-        Начало: {begin_date}
-        Конец: {end_date}
-        Место: {venue}
-        Описание: {venue_description}
-        Пойдешь?""",
-            reply_markup=all_keyboards["remove_speaker"](event["key"]),
-        )
+    if user:
+        user_speech_list = await user_speech_repo.get_all(user["uid"], role="1")
+        for user_speech in user_speech_list:
+            speech_repo = SpeechRepository(session=session)
+            event = await speech_repo.get_one(key=user_speech["key"])
+            title = event["title"]
+            begin_date = event["start_time"]
+            end_date = event["end_time"]
+            venue = event["venue"]
+            venue_description = event["venue_description"]
+            await message.answer(
+                f"""Мероприятие: {title}
+            Начало: {begin_date}
+            Конец: {end_date}
+            Место: {venue}
+            Описание: {venue_description}
+            Пойдешь?""",
+                reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            )
+    else:
+        logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
 

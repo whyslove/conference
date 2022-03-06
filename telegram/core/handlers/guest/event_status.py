@@ -1,6 +1,9 @@
 """Module to declare event status handler."""
+import asyncio
 from aiogram import types
 from loguru import logger
+from core import config
+from core.utils.reminder import GuestReminder, SpeakerReminder
 from core.keyboards.all_keyboards import all_keyboards
 from core.database.create_table import SessionLocal
 from core.database.repositories.speech import SpeechRepository
@@ -22,8 +25,8 @@ async def add_event(callback: types.CallbackQuery):
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=callback.from_user.id)
-    us = await user_speech_repo.get_one(user["uid"], role="0", key=target_event["key"])
-    user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+    us = await user_speech_repo.get_one(user["uid"], key=target_event["key"])
+    user_speech_list = await user_speech_repo.get_all(user["uid"])
     # check added before
     added = not us == None
     if added:
@@ -56,10 +59,14 @@ async def add_event(callback: types.CallbackQuery):
             await user_speech_repo.add(
                 {"uid": user["uid"], "key": target_event["key"], "role": "0"}
             )
+            logger.debug(
+                f"Creating a job to event {event_id} which was added by guest {callback.from_user}"
+            )
+            guest_reminder = GuestReminder(chat_id=callback.from_user.id, event=target_event)
+            config.sc.add_remind(guest_reminder)
             logger.debug(f"Event {event_id} was successfully added by guest {callback.from_user}")
             await callback.message.delete_reply_markup()
             await callback.message.edit_text(callback.message.text + "\nВы выбрали это мероприятие")
-            # TODO Create a job to make a notification
     await session.close()
 
 
@@ -76,9 +83,18 @@ async def remove_event_guest(callback: types.CallbackQuery):
     user = await user_repo.get_one(tg_chat_id=callback.from_user.id)
     user_speech_repo = UserSpeechRepository(session)
     user_speech_repo.delete(uid=user["uid"], key=event_id, role="0")
-    logger.debug(f"Event {event_id} was successfully deleted by guest {callback.from_user}")
+    logger.debug(f"Event {event_id} was successfully from db deleted by guest {callback.from_user}")
+    logger.debug(
+        f"Deleting a job to event {event_id} which was added by guest {callback.from_user}"
+    )
+    speech_repo = SpeechRepository(session=session)
+    target_event = await speech_repo.get_one(key=event_id)
+    guest_reminder = GuestReminder(chat_id=callback.from_user.id, event=target_event)
+    config.sc.remove_remind(guest_reminder)
+    logger.debug(
+        f"A job to event {event_id} which was added by guest {callback.from_user} was successfully removed"
+    )
     await session.close()
-    # delete a job to make a notification
     await callback.message.delete()
 
 
@@ -95,7 +111,13 @@ async def remove_event_speaker(callback: types.CallbackQuery):
     user = await user_repo.get_one(tg_chat_id=callback.from_user.id)
     user_speech_repo = UserSpeechRepository(session)
     user_speech_repo.delete(uid=user["uid"], key=event_id, role="1")
-    logger.debug(f"Event {event_id} was successfully deleted by speaker {callback.from_user}")
+    logger.debug(
+        f"Event {event_id} was successfully deleted by speaker {callback.from_user} from db"
+    )
+    speech_repo = SpeechRepository(session=session)
+    target_event = await speech_repo.get_one(key=event_id)
+    speaker_reminder = SpeakerReminder(chat_id=callback.from_user.id, event=target_event)
+    config.sc.remove_remind(speaker_reminder)
+    logger.debug(f"Speakers job to event {event_id}  {callback.from_user} was successfully removed")
     await session.close()
-    # delete a job to make a notification
     await callback.message.delete()
