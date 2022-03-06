@@ -23,6 +23,7 @@ async def event_status_guest(message: types.Message, state: FSMContext):
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     user_speech_repo = UserSpeechRepository(session)
     event_data = await state.get_data()
+    print(event_data)
     await state.reset_data()
     match message.text.lower():
         case "пойду":

@@ -31,7 +31,7 @@ class GuestReminder(BasicReminder):
         self.event = event
 
     async def send_notification(self, dp: Dispatcher):
-        logger(f"Sending notification to {self.chat_id} about {self.event}")
+        logger.debug(f"Sending notification to {self.chat_id} about {self.event}")
         await dp.bot.send_message(
             self.chat_id,
             f"{self.event['title']} наступает через {datetime.now() - self.event['start_time']}",
@@ -44,9 +44,12 @@ class GuestReminder(BasicReminder):
         await dp.storage.set_data(user=self.chat_id, data=self.event)
         await dp.storage.set_state(user=self.chat_id, state="response_guest")
 
+    def callback(self, dp):
+        asyncio.ensure_future(self.send_notification(dp))
+
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
         logger.debug(f"Adding notification for guest {self.chat_id} and {self.event}")
-        scheduler.add_job(
+        """scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(minutes=1),
@@ -56,14 +59,19 @@ class GuestReminder(BasicReminder):
             ],
         )
         for job in scheduler.get_jobs():
-            logger.debug(f"{job}")
+            logger.debug(f"{job}")"""
+        loop = asyncio.get_event_loop()
+
+        when_to_call = (self.event["start_time"] - timedelta(minutes=10)).timestamp()
+        loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         logger.debug(f"Removing notification for guest {self.chat_id} and {self.event}")
-        try:
+        """try:
             scheduler.remove_job(job_id=str(self.chat_id) + ":" + self.event["key"])
         except JobLookupError:
             pass
+        """
 
 
 class SpeakerReminder(BasicReminder):
@@ -85,9 +93,12 @@ class SpeakerReminder(BasicReminder):
         await dp.storage.set_data(user=self.chat_id, data=self.event)
         await dp.storage.set_state(user=self.chat_id, state="response_speaker")
 
+    def callback(self, dp):
+        asyncio.ensure_future(self.send_notification(dp))
+
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
         logger.debug(f"Removing notification for guest {self.chat_id} and {self.event}")
-        scheduler.add_job(
+        """scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(days=1),
@@ -95,8 +106,11 @@ class SpeakerReminder(BasicReminder):
             args=[
                 dp,
             ],
-        )
-        scheduler.add_job(
+        )"""
+        loop = asyncio.get_event_loop()
+        when_to_call = (self.event["start_time"] - timedelta(minutes=10)).timestamp()
+        loop.call_at(when_to_call, self.callback, dp)
+        """scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(hours=3),
@@ -104,8 +118,11 @@ class SpeakerReminder(BasicReminder):
             args=[
                 dp,
             ],
-        )
-        scheduler.add_job(
+        )"""
+        loop = asyncio.get_event_loop()
+        when_to_call = (self.event["start_time"] - timedelta(days=1)).timestamp()
+        loop.call_at(when_to_call, self.callback, dp)
+        """scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(minutes=10),
@@ -113,17 +130,20 @@ class SpeakerReminder(BasicReminder):
             args=[
                 dp,
             ],
-        )
+        )"""
+        loop = asyncio.get_event_loop()
+        when_to_call = (self.event["start_time"] - timedelta(hours=2)).timestamp()
+        loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         logger.debug(f"Removing notification for speakers {self.chat_id} and {self.event}")
-        for num in range(3):
+        """for num in range(3):
             try:
                 scheduler.remove_job(
                     job_id=str(self.chat_id) + ":" + self.event["key"] + ":" + str(num)
                 )
             except JobLookupError:
-                pass
+                pass"""
 
 
 class ModeratorReminder(BasicReminder):
@@ -146,15 +166,21 @@ class ModeratorReminder(BasicReminder):
 
         session.close()
 
+    def callback(self, dp):
+        asyncio.ensure_future(self.send_notification(dp))
+
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
-        scheduler.add_job(
+        """scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(minutes=10),
             args=[
                 dp,
             ],
-        )
+        )"""
+        loop = asyncio.get_event_loop()
+        when_to_call = (self.event["start_time"] - timedelta(minutes=15)).timestamp()
+        loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         pass
@@ -170,9 +196,9 @@ class Scheduler:
             executors=config.executors,
             job_defaults=config.job_defaults,
         )"""
-        self.scheduler = AsyncIOScheduler(timezone=tz)
+        self.scheduler = None  # AsyncIOScheduler(timezone=tz, event_loop=asyncio.get_event_loop())
         self.dp = dp
-        self.scheduler.start()
+        # self.scheduler.start()
         logger.debug("Scheduler was initialized successfully")
 
     def add_remind(self, reminder: BasicReminder):

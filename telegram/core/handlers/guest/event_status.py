@@ -1,5 +1,6 @@
 """Module to declare event status handler."""
 import asyncio
+from time import sleep
 from aiogram import types
 from loguru import logger
 from core import config
