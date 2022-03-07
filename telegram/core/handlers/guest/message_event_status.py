@@ -24,20 +24,20 @@ async def event_status_guest(message: types.Message, state: FSMContext):
     user_speech_repo = UserSpeechRepository(session)
     event_data = await state.get_data()
     print(event_data)
-    await state.reset_data()
     match message.text.lower():
         case "пойду":
             await user_speech_repo.update(
                 uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
             )
             await message.answer("Отлично")
-            await state.set_data("guest_main")
+            await state.reset_data()
+            await state.set_state("guest_main")
         case "не пойду":
             await user_speech_repo.update(
                 uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
             )
             await message.answer("Жаль")
-            await state.set_data("guest_main")
+            await state.set_state("guest_main")
         case _:
             await message.answer("Не могу разобрать, напиши Пойду или Не пойду")
 
@@ -55,7 +55,7 @@ async def event_status_speaker(message: types.Message, state: FSMContext):
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     moderator = await user_repo.get_one(is_admin=True)
     user_speech_repo = UserSpeechRepository(session)
-    event_data = await state.reset_data()
+    event_data = await state.get_data()
     if moderator:
         # send data to moderator
         if moderator["tg_chat_id"]:
@@ -67,10 +67,12 @@ async def event_status_speaker(message: types.Message, state: FSMContext):
     if message.text.lower() == "не пойду":
         speaker_reminder = SpeakerReminder(chat_id=message.from_user.id, event=event_data)
         config.sc.remove_remind(speaker_reminder)
+        message.answer("Жаль")
     else:
         await message.answer("Отлично")
     # update information
     await user_speech_repo.update(
         uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
     )
+    await state.reset_data()
     await state.set_state("guest_main")

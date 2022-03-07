@@ -4,7 +4,7 @@ from pydantic import SecretStr
 from core.database.repositories import token, user
 from core.database.create_table import SessionLocal
 from core.database.repositories.speech import SpeechRepository
-from core.utils.reminder import ModeratorReminder
+from core.utils.reminder import ModeratorReminder, SpeakerReminder
 from core import config
 from loguru import logger
 from aiogram import types
@@ -12,6 +12,7 @@ from aiogram.dispatcher.storage import FSMContext
 from core.utils.utils import clear_directory
 from core.utils.parser_csv import parse_xlsx
 from core.keyboards.all_keyboards import all_keyboards
+from core.database.repositories.user_speech import UserSpeechRepository
 
 
 async def start_enter_token(message: types.Message, state: FSMContext):
@@ -84,10 +85,25 @@ async def upload_xls(message: types.Message, state: FSMContext):
             logger.debug(f"Setting reminds for moderator {message.from_user}")
             session = SessionLocal()
             speech_repo = SpeechRepository(session)
-            for event in await speech_repo.get_all():
-                reminder = ModeratorReminder(message.from_user.id, event)
-                config.sc.add_remind(reminder)
-            logger.debug(f"Reminds for moderator {message.from_user} set successfully")
+            event_list = await speech_repo.get_all()
+            if event_list:
+                for event in event_list:
+                    reminder = ModeratorReminder(message.from_user.id, event)
+                    config.sc.add_remind(reminder)
+                logger.debug(f"Reminds for moderator {message.from_user} set successfully")
+            else:
+                logger.debug(f"Reminds for moderator {message.from_user} don't set")
+            logger.debug(f"Setting reminds for speakers {message.from_user}")
+            user_speech_repo = UserSpeechRepository(session)
+            user_speech_list = await user_speech_repo.get_all(role="1")
+            if user_speech_list:
+                for user_speech in user_speech_list:
+                    event = await speech_repo.get_one(key=user_speech["key"])
+                    speaker_reminder = SpeakerReminder(user_speech["uid"], event)
+                    config.sc.add_remind(speaker_reminder)
+                logger.debug(f"Reminds for speaker {message.from_user} set successfully")
+            else:
+                logger.debug(f"Reminds for speaker {message.from_user} don't set")
         else:
             await message.answer(error)
             return

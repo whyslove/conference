@@ -27,6 +27,8 @@ class BasicReminder(ABC):
 
 class GuestReminder(BasicReminder):
     def __init__(self, chat_id, event: Dict):
+        if not chat_id:
+            raise TypeError("chat_id must be not empty")
         self.chat_id = chat_id
         self.event = event
 
@@ -34,12 +36,12 @@ class GuestReminder(BasicReminder):
         logger.debug(f"Sending notification to {self.chat_id} about {self.event}")
         await dp.bot.send_message(
             self.chat_id,
-            f"{self.event['title']} наступает через {datetime.now() - self.event['start_time']}",
+            f"{self.event['title']} наступает через {self.event['start_time'] - datetime.now()}",
         )
         await dp.bot.send_message(
             self.chat_id,
             f"Будете ли вы на {self.event['title']}\
-        Напишите Буду, если намереваетесь придти и Не буду, если не придете",
+        Напишите Пойду, если намереваетесь придти и Не пойду, если не придете",
         )
         await dp.storage.set_data(user=self.chat_id, data=self.event)
         await dp.storage.set_state(user=self.chat_id, state="response_guest")
@@ -62,7 +64,10 @@ class GuestReminder(BasicReminder):
             logger.debug(f"{job}")"""
         loop = asyncio.get_event_loop()
 
-        when_to_call = (self.event["start_time"] - timedelta(minutes=10)).timestamp()
+        when_to_call = (
+            loop.time()
+            + (self.event["start_time"] - timedelta(minutes=10) - datetime.now()).total_seconds()
+        )
         loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
@@ -75,29 +80,40 @@ class GuestReminder(BasicReminder):
 
 
 class SpeakerReminder(BasicReminder):
-    def __init__(self, chat_id, event: Dict):
-        self.chat_id = chat_id
+    def __init__(self, email, event: Dict):
+        if not email:
+            raise TypeError("email must be not empty")
+        self.email = email
         self.event = event
 
     async def send_notification(self, dp: Dispatcher):
-        logger(f"Sending notification to {self.chat_id} about {self.event}")
-        dp.bot.send_message(
-            self.chat_id,
-            f"{self.event['title']} наступает через {datetime.now() - self.event['start_time']}",
-        )
-        await dp.bot.send_message(
-            self.chat_id,
-            f"Будете ли вы на {self.event['title']}\
-        Напишите где находитесь, если намереваетесь придти и Отказываюсь, если не придете",
-        )
-        await dp.storage.set_data(user=self.chat_id, data=self.event)
-        await dp.storage.set_state(user=self.chat_id, state="response_speaker")
+        logger.debug(f"Sending notification to speaker {self.email} about {self.event}")
+        session = SessionLocal()
+        user_repo = UserRepository(session)
+        user = await user_repo.get_one(self.email)
+        chat_id = user["tg_chat_id"]
+        if chat_id:
+            logger.debug(f"Sending notification to {chat_id} about {self.event}")
+            await dp.bot.send_message(
+                chat_id,
+                f"{self.event['title']} наступает через {datetime.now() - self.event['start_time']}",
+            )
+            await dp.bot.send_message(
+                chat_id,
+                f"Будете ли вы на {self.event['title']}\
+            Напишите где находитесь, если намереваетесь придти и Отказываюсь, если не придете",
+            )
+            await dp.storage.set_data(user=chat_id, data=self.event)
+            await dp.storage.set_state(user=chat_id, state="response_speaker")
+        else:
+            logger.debug(f"No chit id provided in db for {self.email}")
+        await session.close()
 
     def callback(self, dp):
         asyncio.ensure_future(self.send_notification(dp))
 
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
-        logger.debug(f"Removing notification for guest {self.chat_id} and {self.event}")
+        logger.debug(f"Adding notification for speaker {self.email} and {self.event}")
         """scheduler.add_job(
             self.send_notification,
             "date",
@@ -108,7 +124,10 @@ class SpeakerReminder(BasicReminder):
             ],
         )"""
         loop = asyncio.get_event_loop()
-        when_to_call = (self.event["start_time"] - timedelta(minutes=10)).timestamp()
+        when_to_call = (
+            loop.time()
+            + (self.event["start_time"] - timedelta(minutes=10) - datetime.now()).total_seconds()
+        )
         loop.call_at(when_to_call, self.callback, dp)
         """scheduler.add_job(
             self.send_notification,
@@ -119,8 +138,10 @@ class SpeakerReminder(BasicReminder):
                 dp,
             ],
         )"""
-        loop = asyncio.get_event_loop()
-        when_to_call = (self.event["start_time"] - timedelta(days=1)).timestamp()
+        when_to_call = (
+            loop.time()
+            + (self.event["start_time"] - timedelta(hours=2) - datetime.now()).total_seconds()
+        )
         loop.call_at(when_to_call, self.callback, dp)
         """scheduler.add_job(
             self.send_notification,
@@ -131,12 +152,14 @@ class SpeakerReminder(BasicReminder):
                 dp,
             ],
         )"""
-        loop = asyncio.get_event_loop()
-        when_to_call = (self.event["start_time"] - timedelta(hours=2)).timestamp()
+        when_to_call = (
+            loop.time()
+            + (self.event["start_time"] - timedelta(hours=2) - datetime.now()).total_seconds()
+        )
         loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
-        logger.debug(f"Removing notification for speakers {self.chat_id} and {self.event}")
+        logger.debug(f"Removing notification for speakers {self.email} and {self.event}")
         """for num in range(3):
             try:
                 scheduler.remove_job(
@@ -152,7 +175,7 @@ class ModeratorReminder(BasicReminder):
         self.event = event
 
     async def send_notification(self, dp: Dispatcher):
-        logger(f"Sending notification to {self.chat_id} about events")
+        logger.debug(f"Sending notification to {self.chat_id} about events")
         session = SessionLocal()
         user_speech_repo = UserSpeechRepository(session)
         user_speech_list = await user_speech_repo.get_all(role="1", key=self.event["key"])
@@ -164,7 +187,7 @@ class ModeratorReminder(BasicReminder):
                 self.chat_id, f"{user['snp']} {self.event['title']} {acknowledgment}"
             )
 
-        session.close()
+        await session.close()
 
     def callback(self, dp):
         asyncio.ensure_future(self.send_notification(dp))
@@ -179,7 +202,10 @@ class ModeratorReminder(BasicReminder):
             ],
         )"""
         loop = asyncio.get_event_loop()
-        when_to_call = (self.event["start_time"] - timedelta(minutes=15)).timestamp()
+        when_to_call = (
+            loop.time()
+            + (self.event["start_time"] - timedelta(minutes=5) - datetime.now()).total_seconds()
+        )
         loop.call_at(when_to_call, self.callback, dp)
 
     def remove_notification(self, scheduler: AsyncIOScheduler):

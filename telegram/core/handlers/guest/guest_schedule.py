@@ -123,8 +123,7 @@ async def show_personal_schedule_all(message: types.Message):
             Конец: {end_date}
             Место: {venue}
             Описание: {venue_description}
-            Пойдешь?""",
-                reply_markup=all_keyboards["remove_event"](event["key"]),
+            Пойдешь?""",  # reply_markup=all_keyboards["remove_event"](event["key"]),
             )
     else:
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
@@ -159,8 +158,7 @@ async def show_personal_speech(message: types.Message):
             Конец: {end_date}
             Место: {venue}
             Описание: {venue_description}
-            Пойдешь?""",
-                reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            Пойдешь?""",  # reply_markup=all_keyboards["remove_speaker"](event["key"]),
             )
     else:
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
