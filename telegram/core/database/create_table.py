@@ -136,12 +136,11 @@ class Token(Base):
 
 # create tables
 async def update_tables(dev=False):
-    from tests.test_all import TestBase
-
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     if dev:
+        from tests.test_all import TestBase
         testing = TestBase(Base)
         await testing.start()
 

@@ -1,13 +1,29 @@
 version: '3.7'
 
 services:
-  db:
-    container_name: db
+  postgres:
+    container_name: conf_pg
     image: postgres
     environment:
-      POSTGRES_USER: conf
+      TZ: "Europe/Moscow"
+      POSTGRES_USER: conf_user
       POSTGRES_PASSWORD: conf_pass
       POSTGRES_DB: conf_db
     ports:
-      - 5433:5432
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  bot:
+    container_name: conf_bot
+    build: .
+    environment:
+      TZ: "Europe/Moscow"
+    env_file:
+      - telegram/.env
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    depends_on:
+      - postgres
