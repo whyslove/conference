@@ -10,7 +10,7 @@ ROLE_GUEST = "0"
 ROLE_SPEAKER = "1"
 
 
-async def parse_xlsx(full_path: str):
+async def parse_xlsx(full_path: str, admin_tg_id: str):
     """Replace all database with info from this xlsx file
 
     Args:
@@ -19,8 +19,22 @@ async def parse_xlsx(full_path: str):
     Returns:
         str: Error or None
     """
-
+    # temp save of admin
+    ur = user.UserRepository(session=SessionLocal())
+    save_usr = await ur.get_one(tg_chat_id=admin_tg_id)
+    # end temp save of admin
     await delete_all_data_in_tables()
+    # start temp insert of admin
+    await ur.add(
+        {
+            "uid": save_usr["uid"],
+            "snp": save_usr["snp"],
+            "phone": save_usr["phone"],
+            "tg_chat_id": save_usr["tg_chat_id"],
+            "is_admin": save_usr["is_admin"],
+        }
+    )
+    # end temp insert of admin
 
     xlsx_file = Path(full_path)
     xlsx_obj = openpyxl.load_workbook(xlsx_file)
@@ -36,6 +50,8 @@ async def parse_xlsx(full_path: str):
     for email, fio, phone, is_admin, *_ in members_data:  # *_ to store blank cells
         if not email:
             break
+        if email == save_usr["uid"]:  # temp save admin
+            continue  # temp save admin
         try:
             await ur.add({"uid": email, "snp": fio, "phone": phone, "is_admin": is_admin})
         except Exception as exp:

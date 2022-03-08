@@ -19,6 +19,7 @@ WEBHOK_PATH = "/bot"
 async def on_startup():
     """Initializes filters, middlewares, hadlers and webhook."""
     from core.database.create_table import update_tables
+
     await update_tables(dev=False)
     await bot.set_webhook(url=config.WEBHOOK_URL + WEBHOK_PATH)
     filters.setup(dp)

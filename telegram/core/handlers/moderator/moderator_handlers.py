@@ -40,7 +40,7 @@ async def enter_email_for_token(message: types.Message, state: FSMContext):
     logger.debug(f"Get email, {message.text}, try update")
     ur = user.UserRepository(session=SessionLocal())
     if await ur.get_one(uid=message.text):  # if it existing user
-        ur.update(uid=message.text, new_is_admin=True)
+        await ur.update(uid=message.text, new_is_admin=True)
     else:  # if db is empty and it is false user
         await ur.add(
             {
@@ -55,7 +55,7 @@ async def enter_email_for_token(message: types.Message, state: FSMContext):
     await state.set_state("moderator_main")
     await message.answer("Вот меню", reply_markup=all_keyboards["moderator_menu"]())
 
-    ur.session.close()
+    await ur.session.close()
 
 
 async def prepare_upload_xls(message: types.Message, state: FSMContext):
@@ -78,7 +78,7 @@ async def upload_xls(message: types.Message, state: FSMContext):
     )
     if dest:  # ????????????????????? ваще хз чо будет здесь елси всё крашнется
         await message.answer("Подождите пожалуйста, это может занять некоторое время")
-        error = await parse_xlsx(dest_dir + "/" + file_name)
+        error = await parse_xlsx(dest_dir + "/" + file_name, message.from_user.id)
         if error == None:
             await message.answer("Файл успешно загружен")
             # set reminder to moderator

@@ -141,6 +141,7 @@ async def update_tables(dev=False):
 
     if dev:
         from tests.test_all import TestBase
+
         testing = TestBase(Base)
         await testing.start()
 
