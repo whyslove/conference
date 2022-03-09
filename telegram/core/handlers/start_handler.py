@@ -88,10 +88,9 @@ async def commands(message: types.Message, state: FSMContext):
             await ur.session.close()
         case "help":
             await message.answer(
-                """Страничка помощи:\n
-                /start начать работу бота и приступить к авторизации через почту\n
-                /stop сбросить состояние бота \n
-                /menu показать меню c кнопками \n
-                /help показать помощь 
-                """
+                "Страничка помощи:\n\
+            /start начать работу бота и приступить к авторизации через почту\n\
+            /stop сбросить состояние бота \n\
+            /menu показать меню c кнопками \n\
+            /help показать помощь"
             )
