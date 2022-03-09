@@ -60,7 +60,7 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
             await ur.add({"uid": email, "snp": fio, "phone": phone, "is_admin": is_admin})
         except Exception as exp:
             logger.error(exp)
-            return f"Произошла ошибка при обработке листа 'Участники' и человека {fio} с почтой {email}"
+            return f"Произошла ошибка при обработке листа 'Участники' и человека {fio} с почтой {email}. Загрузите конфиг ещё раз"
 
     event_data = xlsx_obj["Событие"].values
     _ = next(event_data)  # skip title
@@ -81,10 +81,11 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
                 }
             )
             for speaker in speakers.split(";"):
+                speaker = process_str_data([speaker])[0]
                 await usr.add({"uid": speaker, "key": res["key"], "role": ROLE_SPEAKER})
         except Exception as exp:
             logger.error(exp)
-            return f"Произошла строчка при обработке листа 'События' и строки с названием {title}, временем начала {start}, метом {place}"
+            return f"Произошла строчка при обработке листа 'События' и строки с названием {title}, временем начала {start}, меcтом {place}. Загрузите конфиг ещё раз"
 
     session.close()
 
