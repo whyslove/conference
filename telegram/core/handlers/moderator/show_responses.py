@@ -27,6 +27,12 @@ async def show_responses(message: types.Message, state: FSMContext):
         user = await user_repo.get_one(uid=user_speech["uid"])
         acknowledgment = user_speech["acknowledgment"]
         event = await speech_repo.get_one(key=user_speech["key"])
-        await message.answer(
-            f"{user['snp']} {event['title']} {user_speech['role']} {acknowledgment}"
-        )
+        acknowledgment = user_speech["acknowledgment"]
+        if acknowledgment:
+            await message.answer(
+                f"{user['snp']} написал: \"{acknowledgment}\" о мероприятии \"{event['title']}\""
+            )
+        else:
+            await message.answer(
+                f"{user['snp']} ничего не написал о мероприятии \"{event['title']}\""
+            )

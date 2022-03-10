@@ -27,7 +27,9 @@ async def general_schedule(message: types.Message, state: FSMContext):
         user_speech_list = await user_speech_repo.get_all(user["uid"])
         previous_selected_list = [user_speech["key"] for user_speech in user_speech_list]
         speech_repo = SpeechRepository(session)
+        has_events = False
         for event in await speech_repo.get_all():
+            has_events = True
             title = event["title"]
             begin_date = event["start_time"]
             end_date = event["end_time"]
@@ -36,22 +38,25 @@ async def general_schedule(message: types.Message, state: FSMContext):
             selected = event["key"] in previous_selected_list
             if not selected:
                 await message.answer(
-                    f"""Мероприятие: {title}
-            Начало: {begin_date}
-            Конец: {end_date}
+                    f"""Мероприятие: \"{title}\"
+            Начало: {begin_date.strftime("%d-%m %H:%M")} МСК
+            Конец: {end_date.strftime("%d-%m %H:%M")} МСК
             Место: {venue}
             Описание: {venue_description}""",
                     reply_markup=all_keyboards["add_event"](event["key"]),
                 )
             else:
                 await message.answer(
-                    f"""Мероприятие: {title}
-        Начало: {begin_date}
-        Конец: {end_date}
+                    f"""Мероприятие: \"{title}\"
+        Начало: {begin_date.strftime("%d-%m %H:%M")} МСК
+        Конец: {end_date.strftime("%d-%m %H:%M")} МСК
         Место: {venue}
         Описание: {venue_description}
-        Вы ранее записались на это мероприятие""",
+        Вы ранее записались на это мероприятие!""",
                 )
+        if not has_events:
+            await message.answer("Мероприятий нет :(")
     else:
+        await message.answer("Мероприятий нет :(")
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()

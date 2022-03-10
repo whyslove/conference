@@ -33,14 +33,19 @@ class GuestReminder(BasicReminder):
 
     async def send_notification(self, dp: Dispatcher):
         logger.debug(f"Sending notification to {self.chat_id} about {self.event}")
+        # deleting seconds and microseconds
+        delta = self.event["start_time"] - datetime.now()
+        delta = delta - timedelta(seconds=delta.seconds)
+        delta = delta - timedelta(microseconds=delta.microseconds)
         await dp.bot.send_message(
             self.chat_id,
-            f"{self.event['title']} наступает через {self.event['start_time'] - datetime.now()}",
+            f"\"{self.event['title']}\" наступает через {delta}",
         )
         await dp.bot.send_message(
             self.chat_id,
-            f"Будете ли вы на {self.event['title']}\
-        Напишите Пойду, если намереваетесь придти и Не пойду, если не придете",
+            f"""Придете ли вы на мероприятие \"{self.event['title']}\"?
+Напишите <b>пойду</b> или <b>не пойду</b>!""",
+            parse_mode="HTML",
         )
         await dp.storage.set_data(user=self.chat_id, data=self.event)
         await dp.storage.set_state(user=self.chat_id, state="response_guest")
@@ -93,14 +98,18 @@ class SpeakerReminder(BasicReminder):
         chat_id = user["tg_chat_id"]
         if chat_id:
             logger.debug(f"Sending notification to {chat_id} about {self.event}")
+            delta = datetime.now() - self.event["start_time"]
+            delta = delta - timedelta(seconds=delta.seconds)
+            delta = delta - timedelta(microseconds=delta.microseconds)
             await dp.bot.send_message(
                 chat_id,
-                f"{self.event['title']} наступает через {datetime.now() - self.event['start_time']}",
+                f"{self.event['title']} наступает через {delta}",
             )
             await dp.bot.send_message(
                 chat_id,
-                f"Будете ли вы на {self.event['title']}\
-            Напишите где находитесь, если намереваетесь придти и Отказываюсь, если не придете",
+                f"""Придете ли вы на мероприятие \"{self.event['title']}\" в качестве спикера?
+Напишите, где находитесь или <b>не пойду</b>!""",
+                parse_mode="HTML",
             )
             await dp.storage.set_data(user=chat_id, data=self.event)
             await dp.storage.set_state(user=chat_id, state="response_speaker")
@@ -182,9 +191,14 @@ class ModeratorReminder(BasicReminder):
             user_repo = UserRepository(session)
             user = await user_repo.get_one(uid=user_speech["uid"])
             acknowledgment = user_speech["acknowledgment"]
-            await dp.bot.send_message(
-                self.chat_id, f"{user['snp']} {self.event['title']} {acknowledgment}"
-            )
+            if acknowledgment:
+                await dp.bot.send_message(
+                    self.chat_id, f"{user['snp']} написал: \"{acknowledgment}\" о мероприятии \"{self.event['title']}\""
+                )
+            else:
+                await dp.bot.send_message(
+                    self.chat_id, f"{user['snp']} ничего не написал о мероприятии \"{self.event['title']}\""
+                )
 
         await session.close()
 

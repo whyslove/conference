@@ -18,7 +18,7 @@ async def personal_schedule(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In personal schedule for guest {message.from_user}")
-    await message.answer("Выберите опцию", reply_markup=all_keyboards["guest_personal_schedule"]())
+    await message.answer("Выберите опцию. Для навигации используйте кнопки!", reply_markup=all_keyboards["guest_personal_schedule"]())
 
 
 async def show_personal_schedule_today(message: types.Message):
@@ -28,32 +28,36 @@ async def show_personal_schedule_today(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In show personal schedule for today for guest {message.from_user}")
-    await message.answer("Расписание на сегодня")
+    await message.answer("Расписание на сегодня:")
     session = SessionLocal()
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     if user:
         user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        has_events = False
         for user_speech in user_speech_list:
             speech_repo = SpeechRepository(session=session)
             event = await speech_repo.get_one(key=user_speech["key"])
             if event["start_time"].date() == datetime.today().date():
+                has_events = True
                 title = event["title"]
                 begin_date = event["start_time"]
                 end_date = event["end_time"]
                 venue = event["venue"]
                 venue_description = event["venue_description"]
                 await message.answer(
-                    f"""Мероприятие: {title}
-                Начало: {begin_date}
-                Конец: {end_date}
+                    f"""Мероприятие: \"{title}\"
+                Начало: {begin_date.strftime("%d-%m %H:%M")}
+                Конец: {end_date.strftime("%d-%m %H:%M")}
                 Место: {venue}
-                Описание: {venue_description}
-                Пойдешь?""",
-                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                Описание: {venue_description}""",  # reply_markup=all_keyboards["remove_event"](event["key"]),
                 )
+        if not has_events:
+            logger.debug(f"User {message.from_user.id} has not events for today")
+            await message.answer("Мероприятий на сегодня нет :(")
     else:
+        await message.answer("Мероприятий на сегодня нет :(")
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
@@ -65,32 +69,36 @@ async def show_personal_schedule_tomorrow(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In show personal schedule for tomorrow for guest {message.from_user}")
-    await message.answer("Расписание на завтра")
+    await message.answer("Расписание на завтра:")
     session = SessionLocal()
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     if user:
         user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        has_events = False
         for user_speech in user_speech_list:
             speech_repo = SpeechRepository(session=session)
             event = await speech_repo.get_one(key=user_speech["key"])
             if event["start_time"].date() == datetime.today().date() + timedelta(days=1):
+                has_events = True
                 title = event["title"]
                 begin_date = event["start_time"]
                 end_date = event["end_time"]
                 venue = event["venue"]
                 venue_description = event["venue_description"]
                 await message.answer(
-                    f"""Мероприятие: {title}
-                Начало: {begin_date}
-                Конец: {end_date}
+                    f"""Мероприятие: \"{title}\"
+                Начало: {begin_date.strftime("%d-%m %H:%M")}
+                Конец: {end_date.strftime("%d-%m %H:%M")}
                 Место: {venue}
-                Описание: {venue_description}
-                Пойдешь?""",
-                    reply_markup=all_keyboards["remove_event"](event["key"]),
+                Описание: {venue_description}""",  # reply_markup=all_keyboards["remove_event"](event["key"]),
                 )
+        if not has_events:
+            logger.debug(f"User {message.from_user.id} has not events for tomorrow")
+            await message.answer("Мероприятий на завтра нет :(")
     else:
+        await message.answer("Мероприятий на завтра нет :(")
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
@@ -102,14 +110,16 @@ async def show_personal_schedule_all(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In show all personal schedule for guest {message.from_user}")
-    await message.answer("Расписание за весь период")
+    await message.answer("Расписание за весь период:")
     session = SessionLocal()
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     if user:
         user_speech_list = await user_speech_repo.get_all(user["uid"], role="0")
+        has_events = False
         for user_speech in user_speech_list:
+            has_events = True
             speech_repo = SpeechRepository(session=session)
             event = await speech_repo.get_one(key=user_speech["key"])
             title = event["title"]
@@ -118,14 +128,17 @@ async def show_personal_schedule_all(message: types.Message):
             venue = event["venue"]
             venue_description = event["venue_description"]
             await message.answer(
-                f"""Мероприятие: {title}
-            Начало: {begin_date}
-            Конец: {end_date}
+                f"""Мероприятие: \"{title}\"
+            Начало: {begin_date.strftime("%d-%m %H:%M")} МСК
+            Конец: {end_date.strftime("%d-%m %H:%M")} МСК
             Место: {venue}
-            Описание: {venue_description}
-            Пойдешь?""",  # reply_markup=all_keyboards["remove_event"](event["key"]),
+            Описание: {venue_description}""",  # reply_markup=all_keyboards["remove_event"](event["key"]),
             )
+        if not has_events:
+            logger.debug(f"User {message.from_user.id} has not events")
+            await message.answer("Мероприятий нет :(")
     else:
+        await message.answer("Мероприятий нет :(")
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
@@ -137,14 +150,16 @@ async def show_personal_speech(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In show personal speech schedule for guest {message.from_user}")
-    await message.answer("Мои выступления")
+    await message.answer("Мои выступления:")
     session = SessionLocal()
     user_speech_repo = UserSpeechRepository(session)
     user_repo = UserRepository(session)
     user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     if user:
         user_speech_list = await user_speech_repo.get_all(user["uid"], role="1")
+        has_events = False
         for user_speech in user_speech_list:
+            has_events = True
             speech_repo = SpeechRepository(session=session)
             event = await speech_repo.get_one(key=user_speech["key"])
             title = event["title"]
@@ -153,14 +168,16 @@ async def show_personal_speech(message: types.Message):
             venue = event["venue"]
             venue_description = event["venue_description"]
             await message.answer(
-                f"""Мероприятие: {title}
-            Начало: {begin_date}
-            Конец: {end_date}
+                f"""Мероприятие: \"{title}\"
+            Начало: {begin_date.strftime("%d-%m %H:%M")} МСК
+            Конец: {end_date.strftime("%d-%m %H:%M")} МСК
             Место: {venue}
-            Описание: {venue_description}
-            Пойдешь?""",  # reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            Описание: {venue_description}""",  # reply_markup=all_keyboards["remove_speaker"](event["key"]),
             )
+        if not has_events:
+            await message.answer("Мероприятий, где вы спикер нет :(")
     else:
+        await message.answer("Мероприятий, где вы спикер нет :(")
         logger.debug(f"Can't find user with {message.from_user.id} tel id")
     await session.close()
 
@@ -172,4 +189,6 @@ async def return_main_menu(message: types.Message):
     :type message: types.Message
     """
     logger.debug(f"In return_main_menu handler for guest {message.from_user}")
-    await message.answer("Вот меню", reply_markup=all_keyboards["guest_menu"]())
+    await message.answer(
+        "Вот меню. Для навигации используйте кнопки!", reply_markup=all_keyboards["guest_menu"]()
+    )
