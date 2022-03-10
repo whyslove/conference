@@ -52,7 +52,7 @@ class User(Base):
 
     uid = Column(String, primary_key=True, default=str(create_uuid))
     snp = Column(String, nullable=False)
-    phone = Column(String, unique=True, nullable=False)
+    phone = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
     tg_chat_id = Column(BigInteger, unique=True, nullable=True)
 

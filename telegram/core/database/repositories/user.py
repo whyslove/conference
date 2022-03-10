@@ -366,7 +366,7 @@ class UserRepository:
                 user.is_admin = new_is_admin
 
             if new_tg_chat_id != "":
-                if new_tg_chat_id not in tg_chat_ids:
+                if new_tg_chat_id == None or new_tg_chat_id not in tg_chat_ids:
                     tg_chat_ids.remove(user.tg_chat_id)
                     user.tg_chat_id = new_tg_chat_id
                     tg_chat_ids.add(new_tg_chat_id)

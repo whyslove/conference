@@ -21,7 +21,7 @@ services:
     environment:
       TZ: "Europe/Moscow"
     env_file:
-      - telegram/.env
+      - ./.env
     ports:
       - "5000:5000"
     restart: unless-stopped
