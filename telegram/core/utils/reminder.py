@@ -35,16 +35,26 @@ class GuestReminder(BasicReminder):
         logger.debug(f"Sending notification to {self.chat_id} about {self.event}")
         # deleting seconds and microseconds
         delta = self.event["start_time"] - datetime.now()
-        delta = delta - timedelta(seconds=delta.seconds)
-        delta = delta - timedelta(microseconds=delta.microseconds)
+        delta_str = ':'.join(str(delta).split(':')[:2])
+        days = delta.days
+        if days != 0:
+            td_str = delta_str.split()
+            if days % 10 == 1:
+                day_str = 'день'
+            elif 2 <= days % 10 <= 4:
+                day_str = 'дня'
+            else:
+                day_str = 'дней'
+            td_str[1] = day_str
+            delta_str = ' '.join(td_str)
         await dp.bot.send_message(
             self.chat_id,
-            f"\"{self.event['title']}\" наступает через {delta}",
+            f"\"{self.event['title']}\" наступает через {delta_str}",
         )
         await dp.bot.send_message(
             self.chat_id,
             f"""Придете ли вы на мероприятие \"{self.event['title']}\"?
-Напишите <b>пойду</b> или <b>не пойду</b>!""",
+Ответьте <b>пойду</b> или <b>не пойду</b>!""",
             parse_mode="HTML",
         )
         await dp.storage.set_data(user=self.chat_id, data=self.event)
@@ -99,11 +109,21 @@ class SpeakerReminder(BasicReminder):
         if chat_id:
             logger.debug(f"Sending notification to {chat_id} about {self.event}")
             delta = datetime.now() - self.event["start_time"]
-            delta = delta - timedelta(seconds=delta.seconds)
-            delta = delta - timedelta(microseconds=delta.microseconds)
+            delta_str = ':'.join(str(delta).split(':')[:2])
+            days = delta.days
+            if days != 0:
+                td_str = delta_str.split()
+                if days % 10 == 1:
+                    day_str = 'день'
+                elif 2 <= days % 10 <= 4:
+                    day_str = 'дня'
+                else:
+                    day_str = 'дней'
+                td_str[1] = day_str
+                delta_str = ' '.join(td_str)
             await dp.bot.send_message(
                 chat_id,
-                f"{self.event['title']} наступает через {delta}",
+                f"{self.event['title']} наступает через {delta_str}",
             )
             await dp.bot.send_message(
                 chat_id,
