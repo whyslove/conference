@@ -41,6 +41,12 @@ def kb_moderator_menu():
     return kb_moderator
 
 
+def kb_go_back_button():
+    kb_back = ReplyKeyboardMarkup()
+    kb_back.add(KeyboardButton("Вернуться назад"))
+    return kb_back
+
+
 def kb_moderator_answers():
     kb_guest = ReplyKeyboardMarkup()
     kb_guest.add(
@@ -75,3 +81,4 @@ all_keyboards["moderator_answers"] = kb_moderator_answers
 all_keyboards["add_event"] = kb_add_event
 all_keyboards["remove_event"] = kb_remove_event
 all_keyboards["remove_speaker"] = kb_remove_speaker
+all_keyboards["back_button"] = kb_go_back_button
