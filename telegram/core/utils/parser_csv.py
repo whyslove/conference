@@ -6,7 +6,6 @@ from core.database.repositories import user, speech, user_speech, role
 from core.database.create_table import SessionLocal
 from datetime import datetime
 from loguru import logger
-from .utils import process_str_data
 
 ROLE_GUEST = "0"
 ROLE_SPEAKER = "1"
