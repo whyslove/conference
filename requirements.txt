@@ -10,3 +10,4 @@ asyncpg~=0.25.0
 apscheduler~=3.9.1
 redis~=4.1.4
 openpyxl
+httpx

@@ -1,4 +1,5 @@
 from turtle import title
+import json
 import openpyxl
 from pathlib import Path
 from core.database.repositories import user, speech, user_speech, role
@@ -6,6 +7,7 @@ from core.database.create_table import SessionLocal
 from datetime import datetime
 from loguru import logger
 from .utils import process_str_data
+import httpx
 
 ROLE_GUEST = "0"
 ROLE_SPEAKER = "1"
@@ -60,7 +62,7 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
             await ur.add({"uid": email, "snp": fio, "phone": phone, "is_admin": is_admin})
         except Exception as exp:
             logger.error(exp)
-            return f"Произошла ошибка при обработке листа 'Участники' и человека {fio} с почтой {email}. Загрузите конфиг ещё раз"
+            return f"Произошла ошибка при обработке листа 'Участники' и человека {fio} с почтой {email}. Внесите изменения и загрузите файл повторно"
 
     event_data = xlsx_obj["Событие"].values
     _ = next(event_data)  # skip title
@@ -68,6 +70,24 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
         title, speakers, start, end, place, desc_place, *_ = process_str_data(
             row
         )  # *_ to store blank cells
+        url = 'https://api.telegra.ph/createPage'
+        desc_lines = desc_place.split('\n')
+        desc_content = [{'tag': 'p', 'children': [line]} for line in desc_lines]
+        desc_content = json.dumps(desc_content)
+        params = {
+            'access_token': '978c0e9e9a2f8dadf820d06bedaf20ce52f84363fb5022cee38f2f95e0b3',
+            'title': title,
+            'author_name': 'Olamia',
+            'author_url': 'https://t.me/olamiaconfbot',
+            'content': desc_content,
+        }
+        async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
+            response = await client.get(url, params=params)
+        resp_json = response.json()
+        if resp_json['ok']:
+            desc_link = response.json()['result']['url']
+        else:
+            desc_link = desc_place
         if not title:
             break
         try:
@@ -77,7 +97,7 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
                     "start_time": datetime.strptime(start, "%Y-%m-%d %H:%M:%S"),
                     "end_time": datetime.strptime(start, "%Y-%m-%d %H:%M:%S"),
                     "venue": place,
-                    "venue_description": desc_place,
+                    "venue_description": desc_link,
                 }
             )
             for speaker in speakers.split(";"):
