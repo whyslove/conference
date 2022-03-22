@@ -1,11 +1,15 @@
-from turtle import title
-import json
 import openpyxl
+
+from validate_email import validate_email
 from pathlib import Path
-from core.database.repositories import user, speech, user_speech, role
-from core.database.create_table import SessionLocal
 from datetime import datetime
 from loguru import logger
+from phonenumbers import carrier, parse
+from phonenumbers.phonenumberutil import number_type
+
+from core.database.repositories import user, speech, user_speech, role
+from core.database.create_table import SessionLocal
+from .utils import MyValidationError
 
 ROLE_GUEST = "0"
 ROLE_SPEAKER = "1"
@@ -49,7 +53,11 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
     _ = next(members_data)  # skip title
     row_number = 2  # use row number for human readable user erorrs. 1st row is title
     for row in members_data:
-        email, fio, phone, is_admin = process_members_row(row)
+        try:
+            email, fio, phone, is_admin = process_members_row(row)
+        except MyValidationError as exp:
+            logger.info(f"Ошибка от пользователя {exp}")
+            return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. {str(exp)}"
         if not email or not fio or not phone:
             return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. Одна из колонок пуста"
         try:
@@ -78,7 +86,13 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
     row_number = 2
 
     for row in event_data:
-        title, speakers, start, end, place, desc_place = process_events_row(row)
+        try:
+            title, speakers, start, end, place, desc_place = process_events_row(row)
+        except MyValidationError as exp:
+            logger.info(f"Ошибка от пользователя {exp}")
+            return (
+                f"Произошла ошибка при обработке листа 'События', в строке {row_number}. {str(exp)}"
+            )
         if not title or not speakers or not start or not end or not place:
             return f"Произошла ошибка при обработке листа 'События', в строке {row_number}. Одна из колонок пуста"
         try:
@@ -176,7 +190,12 @@ def process_members_row(row):
     email = email.rstrip().lstrip().lower()
     fio = fio.rstrip().lstrip()
     phone = phone.rstrip().lstrip()
-    # TODO check is_admin and phone type
+
+    if not validate_email(email_address=email, check_smtp=False, check_dns=False):
+        raise MyValidationError("Неправильно записан email адрес")
+    if not carrier._is_mobile(number_type(parse(phone))):
+        raise MyValidationError("Неправильно записан номер телефона")
+
     return email, fio, phone, is_admin
 
 
@@ -191,10 +210,14 @@ def process_events_row(row):
     """
     title, speakers, start, end, place, desc_place, *_ = row  # *_ to store blank rows
     title = title.rstrip().lstrip()
-    speakers = [speaker.rstrip().lstrip().lower() for speaker in speakers.split(";")]
-    start = datetime.strptime(start.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
-    end = datetime.strptime(end.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
+    speakers = [
+        speaker.rstrip().lstrip().lower() for speaker in speakers.split(";")
+    ]  # no need here email validation because next we check existance in user_table of this emails
+    try:
+        start = datetime.strptime(start.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
+        end = datetime.strptime(end.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        raise MyValidationError("Неправильно сформирована дата")
     place = place.rstrip().lstrip()
     desc_place = desc_place.rstrip().lstrip()
-
     return title, speakers, start, end, place, desc_place

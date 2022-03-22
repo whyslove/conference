@@ -8,6 +8,10 @@ from core.database.create_table import SessionLocal
 from core.keyboards.all_keyboards import all_keyboards
 
 
+class MyValidationError(Exception):
+    pass
+
+
 def clear_directory(directory_path: str):
     """Delete all direcotry
 
