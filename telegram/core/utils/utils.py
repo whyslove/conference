@@ -41,14 +41,3 @@ async def reset_base_state(message: types.Message, state: FSMContext):
         )
 
     await ur.session.close()
-
-
-def process_str_data(array: str):
-    """Apply lower, rstrip, lstrip to str"""
-    result = []
-    for el in array:
-        if type(el) == str:
-            result.append(el.rstrip().lstrip().lower())
-        else:
-            result.append(el)
-    return result

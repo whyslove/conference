@@ -7,14 +7,19 @@ from core.database.create_table import SessionLocal
 from datetime import datetime
 from loguru import logger
 from .utils import process_str_data
-import httpx
 
 ROLE_GUEST = "0"
 ROLE_SPEAKER = "1"
 
 
 async def parse_xlsx(full_path: str, admin_tg_id: str):
-    """Replace all database with info from this xlsx file
+    """Update database with info from this xlsx
+    First work with users. Save those who is now in db in set.
+    While processing users from xlsx, add id db those who is not in set and update
+    others. Only after updating (not adding) an user we remove him from set. So, after processing all
+    users from xlsx, we have in set only users that should be removed
+
+    Same logic applies to events
 
     Args:
         full_path (str): full path to xlsx file
@@ -22,92 +27,115 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
     Returns:
         str: Error or None
     """
+    xlsx_file = Path(full_path)
+    xlsx_obj = openpyxl.load_workbook(xlsx_file)
+
     session = SessionLocal()
     ur = user.UserRepository(session=session)
     rr = role.RoleRepository(session=session)
     sr = speech.SpeechRepository(session=session)
     usr = user_speech.UserSpeechRepository(session=session)
 
-    # temp save of admin
-    save_usr = await ur.get_one(tg_chat_id=admin_tg_id)
-    # end temp save of admin
-    await delete_all_data_in_tables()
-    # start temp insert of admin
-    await ur.add(
-        {
-            "uid": save_usr["uid"],
-            "snp": save_usr["snp"],
-            "phone": save_usr["phone"],
-            "tg_chat_id": save_usr["tg_chat_id"],
-            "is_admin": save_usr["is_admin"],
-        }
-    )
-    # end temp insert of admin
+    old_db_emails = set()
+    if not await rr.get_one(value=ROLE_GUEST):
+        await rr.add({"value": ROLE_GUEST})  # default guest
+        await rr.add({"value": ROLE_SPEAKER})  # perfect speaker
 
-    xlsx_file = Path(full_path)
-    xlsx_obj = openpyxl.load_workbook(xlsx_file)
-
-    await rr.add({"value": ROLE_GUEST})  # dumb guest
-    await rr.add({"value": ROLE_SPEAKER})  # chad speaker
+    all_users = await ur.get_all()
+    logger.debug(f"All users in db: {all_users}")
+    for cur_user in all_users:
+        old_db_emails.add(cur_user["uid"])
 
     members_data = xlsx_obj["Участники"].values
     _ = next(members_data)  # skip title
-    for row in members_data:  # *_ to store blank cells
-        email, fio, phone, is_admin, *_ = process_str_data(row)
-        if not email:
-            break
-        if email == save_usr["uid"]:  # temp save admin
-            continue  # temp save admin
+    row_number = 2  # use row number for human readable user erorrs. 1st row is title
+    for row in members_data:
+        email, fio, phone, is_admin = process_members_row(row)
+        if not email or not fio or not phone:
+            return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. Одна из колонок пуста"
         try:
-            await ur.add({"uid": email, "snp": fio, "phone": phone, "is_admin": is_admin})
+            if email in old_db_emails:
+                await ur.update(uid=email, new_snp=fio, new_phone=phone, new_is_admin=is_admin)
+                old_db_emails.remove(email)
+            else:
+                await ur.add({"uid": email, "snp": fio, "phone": phone, "is_admin": is_admin})
         except Exception as exp:
             logger.error(exp)
-            return f"Произошла ошибка при обработке листа 'Участники' и человека {fio} с почтой {email}. Внесите изменения и загрузите файл повторно"
+            return f"Произошла ошибка при обработке листа 'Участники' в строке {row_number}. \
+                Проверьте уникальность вводимых данных или свяжитесь с администратором"
+        row_number += 1
+
+    for old_email in old_db_emails:
+        await ur.delete(uid=old_email)
+
+    old_db_events = set()
+    all_events = await sr.get_all()
+    logger.debug(f"All events in db: {all_events}")
+    for cur_event in all_events:
+        old_db_events.add((cur_event["title"], cur_event["start_time"]))
 
     event_data = xlsx_obj["Событие"].values
     _ = next(event_data)  # skip title
+    row_number = 2
+
     for row in event_data:
-        title, speakers, start, end, place, desc_place, *_ = process_str_data(
-            row
-        )  # *_ to store blank cells
-        url = 'https://api.telegra.ph/createPage'
-        desc_lines = desc_place.split('\n')
-        desc_content = [{'tag': 'p', 'children': [line]} for line in desc_lines]
-        desc_content = json.dumps(desc_content)
-        params = {
-            'access_token': '978c0e9e9a2f8dadf820d06bedaf20ce52f84363fb5022cee38f2f95e0b3',
-            'title': title,
-            'author_name': 'Olamia',
-            'author_url': 'https://t.me/olamiaconfbot',
-            'content': desc_content,
-        }
-        async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
-            response = await client.get(url, params=params)
-        resp_json = response.json()
-        if resp_json['ok']:
-            desc_link = response.json()['result']['url']
-        else:
-            desc_link = desc_place
-        if not title:
-            break
+        title, speakers, start, end, place, desc_place = process_events_row(row)
+        if not title or not speakers or not start or not end or not place:
+            return f"Произошла ошибка при обработке листа 'События', в строке {row_number}. Одна из колонок пуста"
         try:
-            res = await sr.add(
-                {
-                    "title": title,
-                    "start_time": datetime.strptime(start, "%Y-%m-%d %H:%M:%S"),
-                    "end_time": datetime.strptime(start, "%Y-%m-%d %H:%M:%S"),
-                    "venue": place,
-                    "venue_description": desc_link,
-                }
-            )
-            for speaker in speakers.split(";"):
-                speaker = process_str_data([speaker])[0]
-                await usr.add({"uid": speaker, "key": res["key"], "role": ROLE_SPEAKER})
+            if (title, start) in old_db_events:
+                # I use combination of title and start_time to uniqely identify one record
+                await sr.update(
+                    title=title,
+                    start_time=start,
+                    new_end_time=end,
+                    new_venue=place,
+                    new_venue_description=desc_place,
+                )
+                old_db_events.remove((title, start))
+
+            else:
+                await sr.add(
+                    {
+                        "title": title,
+                        "start_time": start,
+                        "end_time": end,
+                        "venue": place,
+                        "venue_description": desc_place,
+                    }
+                )
+            current_key = (await sr.get_one(title=title, start_time=start))["key"]
+
+            # next we have to handle all speakers like users and events before
+            old_db_speakers = set()
+            all_old_db_speakers = await usr.get_all(key=current_key, role=ROLE_SPEAKER)
+
+            for old_speaker in all_old_db_speakers:
+                old_db_speakers.add(old_speaker["uid"])
+
+            for speaker in speakers:  # speaker is speaker email
+                check_existance = await ur.get_one(uid=speaker)
+                if not check_existance:
+                    logger.debug(f"Error while checking existance of {speaker}")
+                    return f"Произошла ошибка при обработке листа 'События', строка {row_number}. \
+                        Email одного из спикеров не существует в листе 'Участники'"
+                if speaker in old_db_speakers:
+                    old_db_speakers.remove(speaker)
+                else:
+                    await usr.add({"uid": speaker, "key": current_key, "role": ROLE_SPEAKER})
+
+            for old_speaker in old_db_speakers:
+                await usr.delete(uid=old_speaker, key=current_key, role=ROLE_SPEAKER)
+            row_number += 1
+
         except Exception as exp:
             logger.error(exp)
-            return f"Произошла строчка при обработке листа 'События' и строки с названием {title}, временем начала {start}, меcтом {place}. Загрузите конфиг ещё раз"
+            return f"Произошла ошибка при обработке листа 'События', строкa {row_number}. \
+                Проверьте корректность вводимых данных."
+    for old_event in old_db_events:
+        await sr.delete(title=old_event[0], start_time=old_event[1])
 
-    session.close()
+    await session.close()
 
 
 async def delete_all_data_in_tables():
@@ -134,3 +162,40 @@ async def delete_all_data_in_tables():
     await rr.delete(value=ROLE_SPEAKER)
 
     await session.close()
+
+
+def process_members_row(row):
+    """Process one row in members sheet. Be careful if data schema in xlsx will change
+    need to change this function too
+
+    Args:
+        row (list): row in format [email, fio, phone, is_admin, *]
+    Returns:
+        email, fio, phone, is_admin
+    """
+    email, fio, phone, is_admin, *_ = row  # *_ to store blank cells
+    email = email.rstrip().lstrip().lower()
+    fio = fio.rstrip().lstrip()
+    phone = phone.rstrip().lstrip()
+    # TODO check is_admin and phone type
+    return email, fio, phone, is_admin
+
+
+def process_events_row(row):
+    """Process one row in members sheet. Be careful if data schema in xlsx will change
+    need to change this function too
+
+    Args:
+        row (list): row in format [title, speakers, start, end, place, desc_place, *]
+    Returns:
+        title: str, speakers: list, start: datetime, end: datetime, place: str, desc_place: str
+    """
+    title, speakers, start, end, place, desc_place, *_ = row  # *_ to store blank rows
+    title = title.rstrip().lstrip()
+    speakers = [speaker.rstrip().lstrip().lower() for speaker in speakers.split(";")]
+    start = datetime.strptime(start.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
+    end = datetime.strptime(end.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
+    place = place.rstrip().lstrip()
+    desc_place = desc_place.rstrip().lstrip()
+
+    return title, speakers, start, end, place, desc_place
