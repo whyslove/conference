@@ -9,7 +9,7 @@ from core import config
 from loguru import logger
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
-from core.utils.utils import clear_directory
+from core.utils.utils import clear_directory, reset_base_state
 from core.utils.parser_csv import parse_xlsx
 from core.keyboards.all_keyboards import all_keyboards
 from core.database.repositories.user_speech import UserSpeechRepository
@@ -17,14 +17,16 @@ from core.database.repositories.user_speech import UserSpeechRepository
 
 async def prepare_upload_xls(message: types.Message, state: FSMContext):
     """Set appropriate state"""
-
     logger.debug("Prepare upload xls")
     await state.set_state("ready_upload_xls")
-    await message.answer("Загрузите сюда файл .xls")
+    await message.answer("Загрузите сюда файл .xls", reply_markup=all_keyboards["back_button"]())
 
 
 async def upload_xls(message: types.Message, state: FSMContext):
     logger.debug("Upload csv")
+    if message.text == "Вернуться назад":
+        await reset_base_state(message, state)
+        return
     file_id = message.document.file_id
     dest_dir = "./root_xlsx"
     file_name = "xlsx_file.xlsx"
@@ -38,6 +40,7 @@ async def upload_xls(message: types.Message, state: FSMContext):
         error = await parse_xlsx(dest_dir + "/" + file_name, message.from_user.id)
         if error == None:
             await message.answer("Файл успешно загружен")
+            await reset_base_state(message, state)
             # set reminder to moderator
             logger.debug(f"Setting reminds for moderator {message.from_user}")
             session = SessionLocal()
@@ -67,5 +70,3 @@ async def upload_xls(message: types.Message, state: FSMContext):
     else:
         await message.answer("Ошибка при загрузке, свяжитесь с раззработчиками")
         logger.error("Error while dowloading file from tg")
-
-    await state.set_state("moderator_main")

@@ -5,6 +5,7 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram import types
 from core.database.repositories import user
 from core.database.create_table import SessionLocal
+from core.keyboards.all_keyboards import all_keyboards
 
 
 def clear_directory(directory_path: str):
@@ -30,8 +31,14 @@ async def reset_base_state(message: types.Message, state: FSMContext):
         await state.set_state("need_enter_email")
     elif _user["is_admin"]:
         await state.set_state("moderator_main")
+        await message.answer(
+            text="Вовзрат в главное меню", reply_markup=all_keyboards["moderator_menu"]()
+        )
     else:
         await state.set_data("guest_main")
+        await message.answer(
+            text="Возврат в главное меню", reply_markup=all_keyboards["guest_menu"]()
+        )
 
     await ur.session.close()
 
