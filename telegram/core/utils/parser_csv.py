@@ -135,7 +135,7 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
                         "start_time": start,
                         "end_time": end,
                         "venue": place,
-                        "venue_description": desc_place,
+                        "venue_description": desc_link,
                     }
                 )
             current_key = (await sr.get_one(title=title, start_time=start))["key"]
