@@ -10,6 +10,10 @@ from core.database.create_table import SessionLocal
 from core.keyboards.all_keyboards import all_keyboards
 
 
+class MyValidationError(Exception):
+    pass
+
+
 def clear_directory(directory_path: str):
     """Delete all direcotry
 
@@ -43,13 +47,3 @@ async def reset_base_state(message: types.Message, state: FSMContext):
         )
 
     await ur.session.close()
-
-
-def process_str_data(array: Sequence[Any]):
-    result = []
-    for item in array:
-        if isinstance(item, str):
-            result.append(item.strip())
-        else:
-            result.append(item)
-    return result

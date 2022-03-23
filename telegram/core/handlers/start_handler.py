@@ -74,6 +74,7 @@ async def commands(message: types.Message, state: FSMContext):
             await message.answer("Для того, чтобы войти, введите email")
             await state.set_state("need_enter_email")
         case "stop":
+            await message.answer("Вы отключились от бота. Зайдите заново с помощью команды /start")
             await state.reset_data()
             await state.reset_state()
         case "menu":
@@ -94,3 +95,10 @@ async def commands(message: types.Message, state: FSMContext):
             /menu показать меню c кнопками \n\
             /help показать помощь"
             )
+
+
+async def base_handler(message: types.Message, state: FSMContext):
+    await message.answer(
+        "К сможалению, ни один из обработчиков в данный момент не смог обработать ваше сообщение в текущем состоянии. \
+         Для того, чтобы сбросить состояние используйте команду /stop, а затем /start"
+    )

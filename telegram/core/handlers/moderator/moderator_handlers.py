@@ -10,7 +10,7 @@ from core.database.repositories.speech import SpeechRepository
 from core.utils.reminder import ModeratorReminder, SpeakerReminder
 from core import config
 from core.utils.utils import clear_directory, reset_base_state
-from core.utils.parser_csv import parse_xlsx
+from core.utils.parser_csv import parse_xlsx, delete_all_data_in_tables
 from core.keyboards.all_keyboards import all_keyboards
 from core.database.repositories.user_speech import UserSpeechRepository
 
@@ -26,7 +26,13 @@ async def upload_xls(message: types.Message, state: FSMContext):
     logger.debug("Upload csv")
     if message.text == "Вернуться назад":
         await reset_base_state(message, state)
+        await message.answer("Вы вернулись назад")
         return
+    elif message.text == "Удалить все данные":
+        await delete_all_data_in_tables()
+        await message.answer("Вы удалили все данные из таблиц")
+        return
+
     file_id = message.document.file_id
     dest_dir = "./root_xlsx"
     file_name = "xlsx_file.xlsx"
