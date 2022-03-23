@@ -11,5 +11,5 @@ apscheduler~=3.9.1
 redis~=4.1.4
 openpyxl
 httpx
-validate_email
+py3-validate-email
 phonenumbers

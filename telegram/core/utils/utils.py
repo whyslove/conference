@@ -38,7 +38,7 @@ async def reset_base_state(message: types.Message, state: FSMContext):
     elif _user["is_admin"]:
         await state.set_state("moderator_main")
         await message.answer(
-            text="Вовзрат в главное меню", reply_markup=all_keyboards["moderator_menu"]()
+            text="Возврат в главное меню", reply_markup=all_keyboards["moderator_menu"]()
         )
     else:
         await state.set_data("guest_main")
