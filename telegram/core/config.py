@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DB_PATH: str
     JOB_STORE_HOST: str
     JOB_STORE_PORT: str
+    TELEGRAPH_TOKEN: str
 
     class Config:
         env_file = "./telegram/.env"

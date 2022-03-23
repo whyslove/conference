@@ -1,16 +1,37 @@
 """Module to declare reminder."""
+
+from abc import ABC
 import tzlocal
 import asyncio
 from datetime import timedelta, datetime
 from typing import Dict
+
 from aiogram import Dispatcher
-from abc import ABC
-from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.base import JobLookupError
+from loguru import logger
+
 from core.database.create_table import SessionLocal
 from core.database.repositories.user_speech import UserSpeechRepository
 from core.database.repositories.user import UserRepository
+
+
+def serialize_timedelta(delta: timedelta, locale: str = 'ru_RU') -> str:
+    if locale != 'ru_RU':  # we only need russian, but who knows
+        raise ValueError(f'Unsupported locale {locale}')
+    delta_str = ':'.join(str(delta).split(':')[:2])
+    days = delta.days
+    if days != 0:
+        td_str = delta_str.split()
+        if days % 10 == 1:
+            day_str = 'день'
+        elif 2 <= days % 10 <= 4:
+            day_str = 'дня'
+        else:
+            day_str = 'дней'
+        td_str[1] = day_str
+        delta_str = ' '.join(td_str)
+    return delta_str
 
 
 class BasicReminder(ABC):
@@ -35,26 +56,15 @@ class GuestReminder(BasicReminder):
         logger.debug(f"Sending notification to {self.chat_id} about {self.event}")
         # deleting seconds and microseconds
         delta = self.event["start_time"] - datetime.now()
-        delta_str = ':'.join(str(delta).split(':')[:2])
-        days = delta.days
-        if days != 0:
-            td_str = delta_str.split()
-            if days % 10 == 1:
-                day_str = 'день'
-            elif 2 <= days % 10 <= 4:
-                day_str = 'дня'
-            else:
-                day_str = 'дней'
-            td_str[1] = day_str
-            delta_str = ' '.join(td_str)
+        delta_str = serialize_timedelta(delta)
         await dp.bot.send_message(
             self.chat_id,
             f"\"{self.event['title']}\" наступает через {delta_str}",
         )
         await dp.bot.send_message(
             self.chat_id,
-            f"""Придете ли вы на мероприятие \"{self.event['title']}\"?
-Ответьте <b>пойду</b> или <b>не пойду</b>!""",
+            f"Придете ли вы на мероприятие \"{self.event['title']}\"?\n"
+            f"Ответьте <b>пойду</b> или <b>не пойду</b>!",
             parse_mode="HTML",
         )
         await dp.storage.set_data(user=self.chat_id, data=self.event)
@@ -109,32 +119,21 @@ class SpeakerReminder(BasicReminder):
         if chat_id:
             logger.debug(f"Sending notification to {chat_id} about {self.event}")
             delta = datetime.now() - self.event["start_time"]
-            delta_str = ':'.join(str(delta).split(':')[:2])
-            days = delta.days
-            if days != 0:
-                td_str = delta_str.split()
-                if days % 10 == 1:
-                    day_str = 'день'
-                elif 2 <= days % 10 <= 4:
-                    day_str = 'дня'
-                else:
-                    day_str = 'дней'
-                td_str[1] = day_str
-                delta_str = ' '.join(td_str)
+            delta_str = serialize_timedelta(delta)
             await dp.bot.send_message(
                 chat_id,
                 f"{self.event['title']} наступает через {delta_str}",
             )
             await dp.bot.send_message(
                 chat_id,
-                f"""Придете ли вы на мероприятие \"{self.event['title']}\" в качестве спикера?
-Напишите, где находитесь или <b>не пойду</b>!""",
+                f"Придете ли вы на мероприятие \"{self.event['title']}\" в качестве спикера?\n"
+                f"Напишите, где Вы сейчас находитесь или <b>не пойду</b>!",
                 parse_mode="HTML",
             )
             await dp.storage.set_data(user=chat_id, data=self.event)
             await dp.storage.set_state(user=chat_id, state="response_speaker")
         else:
-            logger.debug(f"No chit id provided in db for {self.email}")
+            logger.debug(f"No chat id provided in db for {self.email}")
         await session.close()
 
     def callback(self, dp):

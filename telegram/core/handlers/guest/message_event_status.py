@@ -20,29 +20,25 @@ async def event_status_guest(message: types.Message, state: FSMContext):
     """
     session = SessionLocal()
     user_repo = UserRepository(session)
-    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     user_speech_repo = UserSpeechRepository(session)
+
+    user = await user_repo.get_one(tg_chat_id=message.from_user.id)
     event_data = await state.get_data()
-    match message.text.lower():
-        case "пойду":
-            await user_speech_repo.update(
-                uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
-            )
-            await message.answer("Отлично:)")
-            await state.reset_data()
-            await state.set_state("guest_main")
-        case "не пойду":
-            await user_speech_repo.update(
-                uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
-            )
-            await message.answer("Жаль:(")
-            await state.set_state("guest_main")
-        case _:
-            await message.answer(
-                """Не могу разобрать:(
-Напишите <b>пойду</b> или <b>не пойду</b>""",
-                parse_mode="HTML",
-            )
+    clean_message = message.text.strip().lower()
+    if "не пойду" in clean_message:
+        await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
+        await message.answer("Жаль:(")
+        await state.set_state("guest_main")
+    elif "пойду" in clean_message:
+        await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
+        await message.answer("Отлично:)")
+        await state.reset_data()
+        await state.set_state("guest_main")
+    else:
+        await message.answer(
+            'Не могу разобрать :(\nНапишите <b>пойду</b> или <b>не пойду</b>',
+            parse_mode="HTML",
+        )
 
 
 async def event_status_speaker(message: types.Message, state: FSMContext):
@@ -70,15 +66,13 @@ async def event_status_speaker(message: types.Message, state: FSMContext):
                 )
             else:
                 logger.debug(f"No tg_chat_id for moderator {moderator}")
-    if message.text.lower() == "не пойду":
+    if message.text.lower() == "не пойду":  # FIXME too rigid condition
         speaker_reminder = SpeakerReminder(email=user["uid"], event=event_data)
         config.sc.remove_remind(speaker_reminder)
-        await message.answer("Жаль:(")
+        await message.answer("Жаль :(")
     else:
-        await message.answer("Отлично:)")
+        await message.answer("Отлично :)")
     # update information
-    await user_speech_repo.update(
-        uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
-    )
+    await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
     await state.reset_data()
     await state.set_state("guest_main")

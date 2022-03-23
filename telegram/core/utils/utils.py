@@ -1,8 +1,10 @@
-from pathlib import Path
-from loguru import logger
 import shutil
-from aiogram.dispatcher.storage import FSMContext
+from typing import Sequence, Any
+
+from loguru import logger
 from aiogram import types
+from aiogram.dispatcher.storage import FSMContext
+
 from core.database.repositories import user
 from core.database.create_table import SessionLocal
 from core.keyboards.all_keyboards import all_keyboards
@@ -43,12 +45,11 @@ async def reset_base_state(message: types.Message, state: FSMContext):
     await ur.session.close()
 
 
-def process_str_data(array: str):
-    """Apply lower, rstrip, lstrip to str"""
+def process_str_data(array: Sequence[Any]):
     result = []
-    for el in array:
-        if type(el) == str:
-            result.append(el.rstrip().lstrip().lower())
+    for item in array:
+        if isinstance(item, str):
+            result.append(item.strip())
         else:
-            result.append(el)
+            result.append(item)
     return result

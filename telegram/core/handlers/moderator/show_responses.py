@@ -17,15 +17,16 @@ async def show_responses(message: types.Message, state: FSMContext):
     :param state: FSMContext instance
     :type state: FSMContext
     """
-    logger.debug(f"In show responses for moderator {message.from_user}")
     session = SessionLocal()
     user_speech_repo = UserSpeechRepository(session)
-    user_speech_list = await user_speech_repo.get_all()
     speech_repo = SpeechRepository(session)
+    user_repo = UserRepository(session)
+
+    logger.debug(f"In show responses for moderator {message.from_user}")
+
+    user_speech_list = await user_speech_repo.get_all()
     for user_speech in user_speech_list:
-        user_repo = UserRepository(session)
         user = await user_repo.get_one(uid=user_speech["uid"])
-        acknowledgment = user_speech["acknowledgment"]
         event = await speech_repo.get_one(key=user_speech["key"])
         acknowledgment = user_speech["acknowledgment"]
         if acknowledgment:

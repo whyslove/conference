@@ -1,14 +1,14 @@
 from ast import fix_missing_locations
 from tkinter.tix import Tree
 from pydantic import SecretStr
-from core.database.repositories import token, user
+from loguru import logger
+from aiogram import types
+from aiogram.dispatcher.storage import FSMContext
+
 from core.database.create_table import SessionLocal
 from core.database.repositories.speech import SpeechRepository
 from core.utils.reminder import ModeratorReminder, SpeakerReminder
 from core import config
-from loguru import logger
-from aiogram import types
-from aiogram.dispatcher.storage import FSMContext
 from core.utils.utils import clear_directory, reset_base_state
 from core.utils.parser_csv import parse_xlsx
 from core.keyboards.all_keyboards import all_keyboards
