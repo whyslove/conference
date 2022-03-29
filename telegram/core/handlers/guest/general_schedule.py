@@ -40,14 +40,12 @@ async def general_schedule(message: types.Message, state: FSMContext):
             venue_description=event["venue_description"],
         )
         if selected:
-            msg_text += '\n<em>Вы записаны на это мероприятие</em>'
+            msg_text += "\n<em>Вы записаны на это мероприятие</em>"
         await message.answer(
             msg_text,
-            reply_markup=all_keyboards["add_event"](event["key"]) if selected else None,
-            parse_mode='HTML'
+            reply_markup=all_keyboards["add_event"](event["key"]) if not selected else None,
+            parse_mode="HTML",
         )
     if not has_events:
         await message.answer("Мероприятий нет :(")
     await session.close()
-
-
