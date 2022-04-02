@@ -1,15 +1,12 @@
-from cgitb import text
-import email
-import aiohttp
-
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
+from validate_email import validate_email
 from loguru import logger
-from core.config import config
+
 from core.keyboards.all_keyboards import all_keyboards
-from core.database.repositories import token, user
+from core.database.repositories import user
 from core.database.create_table import SessionLocal
-from core.database.repositories import token
+from core.email_verificator import email_verificator
 
 
 async def ask_email(message: types.Message, state: FSMContext):
@@ -22,15 +19,33 @@ async def check_email(message: types.Message, state: FSMContext):
 
     logger.info(f"Receive message from tg {message.text}")
     ur = user.UserRepository(session=SessionLocal())
-    # TODO send email on email to condirm identity
 
     email = message.text.rstrip().lstrip().lower()
+    if not validate_email(email_address=email, check_smtp=False, check_dns=False):
+        await message.answer(
+            "Ваш email не прошёл валидацию. Пожалуйста, попробуйте ещё раз или свяжитесь с администратором"
+        )
+        return
 
     user_ = await ur.get_one(uid=email)
 
     if not user_:
         logger.info(f"Unknown email {email}")
-        await message.answer("Неправильный email, чтобы войти попробуйте ввести его ещё раз")
+        await message.answer("Вашего email нет в базе данных. Попробуйте ещё раз")
+        await ur.session.close()
+        return
+
+    if user_["tg_chat_id"] != message.from_user.id:
+        await email_verificator.send_email(
+            recepient_email=email,
+            recepient_fio=user_["snp"],
+            tg_chat_id=message.from_user.id,
+        )
+        await message.answer(
+            "Ваш телеграм id не найден. Вы либо зашли впервые, либо зашли с другого аккаунта. "
+            "Мы отправили на данную почту сообщение. Пройдите, пожалуйста, по ссылке в нём, чтобы "
+            "подтвердить, что эта почта принадлежит вам. После подтверждения бот вам снова напишет"
+        )
         await ur.session.close()
         return
 
@@ -38,12 +53,6 @@ async def check_email(message: types.Message, state: FSMContext):
         role = "moderator"
     else:
         role = "guest"
-
-    if await ur.get_one(tg_chat_id=message.from_user.id) != None:
-        await ur.update(tg_chat_id=message.from_user.id, new_tg_chat_id=None)
-        await ur.update(uid=email, new_tg_chat_id=message.from_user.id)
-    else:
-        await ur.update(uid=email, new_tg_chat_id=message.from_user.id)
 
     match role:
         case "moderator":

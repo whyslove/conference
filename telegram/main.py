@@ -25,6 +25,10 @@ async def on_startup():
     filters.setup(dp)
     handlers.setup(dp)
 
+    from core.routes import router
+
+    app.include_router(router)
+
 
 @app.post(WEBHOK_PATH)
 async def bot_webhook(update: dict):

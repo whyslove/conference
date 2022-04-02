@@ -13,3 +13,6 @@ openpyxl
 httpx
 py3-validate-email
 phonenumbers
+aiosmtplib
+jinja2
+aioredis
