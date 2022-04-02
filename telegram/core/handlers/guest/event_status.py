@@ -54,7 +54,7 @@ async def add_event(callback: types.CallbackQuery):
         if intersection_event_id is not None:
             logger.debug(f"Event {event_id} intersects with {intersection_event_id} by guest {callback.from_user}")
             await callback.answer(
-                "Невозможно выбрать это мероприятие, так как у вас образовывается пересечение",
+                "Невозможно выбрать это мероприятие, так как у вас образуется пересечение",
                 show_alert=True,
             )
         else:
@@ -65,6 +65,24 @@ async def add_event(callback: types.CallbackQuery):
             logger.debug(f"Event {event_id} was successfully added by guest {callback.from_user}")
             await callback.message.delete_reply_markup()
             await callback.message.edit_text(callback.message.text + "\nВы выбрали это мероприятие")
+    await session.close()
+
+
+async def show_event_description(callback: types.CallbackQuery):
+    """Sends event description into chat
+
+    :param callback: Callback instance
+    :type callback: types.CallbackQuery
+    """
+    session = SessionLocal()
+    speech_repo = SpeechRepository(session=session)
+
+    event_id = callback.data.split(":")[1]
+    logger.debug(f"Sending description of event {event_id} to user {callback.from_user}")
+
+    target_event = await speech_repo.get_one(key=event_id)
+    await callback.message.answer(target_event['title'] + "\n" + target_event['venue_description'])
+
     await session.close()
 
 

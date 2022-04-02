@@ -99,23 +99,30 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
             )
         if not title or not speakers or not start or not end or not place:
             return f"Произошла ошибка при обработке листа 'События', в строке {row_number}. Одна из колонок пуста"
+        desc_place = (desc_place[:8000] + '...') if len(desc_place) > 8000 else desc_place  # truncate long strings
         desc_lines = desc_place.split('\n')
-        desc_content = [{'tag': 'p', 'children': [line]} for line in desc_lines]
-        desc_content = json.dumps(desc_content)
-        params = {
+        data = {
             'access_token': config.TELEGRAPH_TOKEN,
             'title': title,
             'author_name': 'Olamia',
             'author_url': 'https://t.me/olamiaconfbot',
-            'content': desc_content,
+            'content': json.dumps([{'tag': 'p', 'children': [line]} for line in desc_lines]),
         }
-        async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
-            response = await client.get('https://api.telegra.ph/createPage', params=params)
+        try:
+            async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
+                response = await client.post('https://api.telegra.ph/createPage', data=data)
+        except httpx.RequestError:
+            return f'Не удалось загрузить описание для строки {row_number}. Нет доступа к Telegraph'
+        if response.status_code != httpx.codes.OK:
+            logger.error(response)
+            return f'Не удалось загрузить описание для строки {row_number}. Ответ {response.status_code}'
         resp_json = response.json()
         if resp_json['ok']:
             desc_link = response.json()['result']['url']
         else:
-            desc_link = desc_place
+            logger.error(json.dumps(resp_json))
+            logger.error(data['content'])
+            return f'Не удалось загрузить описание для строки {row_number}'
         try:
             if (title, start) in old_db_events:
                 # I use combination of title and start_time to uniquely identify one record

@@ -7,6 +7,9 @@ from .general_schedule import general_schedule
 from .show_responses import show_responses
 import re
 
+from ..guest import show_event_description
+from ...filters.guest_filters import CallBackFilter
+
 
 def setup(dp: Dispatcher):
     """Function for recursivly register dispatchers
@@ -41,5 +44,10 @@ def setup(dp: Dispatcher):
     )
     dp.register_message_handler(general_schedule, regexp="Общее расписание", state="moderator_main")
     dp.register_message_handler(show_responses, regexp="Ответы участников", state="moderator_main")
+
+    # events
+    dp.register_callback_query_handler(
+        show_event_description, CallBackFilter("show_desc"), state="moderator_main"
+    )
 
     logger.debug("End moderator handler dispatcher")
