@@ -25,15 +25,22 @@ async def show_responses(message: types.Message, state: FSMContext):
     logger.debug(f"In show responses for moderator {message.from_user}")
 
     user_speech_list = await user_speech_repo.get_all()
+    sorted(
+        user_speech_list,
+        key=lambda user_speech: (user_speech["key"], user_speech["role"], user_speech["uid"]),
+    )
+    await message.answer("Текущие ответы участников:")
     for user_speech in user_speech_list:
         user = await user_repo.get_one(uid=user_speech["uid"])
         event = await speech_repo.get_one(key=user_speech["key"])
         acknowledgment = user_speech["acknowledgment"]
         if acknowledgment:
             await message.answer(
-                f"{user['snp']} написал: \"{acknowledgment}\" о мероприятии \"{event['title']}\""
+                f"{user['snp']}: {'спикер' if user_speech['role'] == '1' else 'гость'} написал: \"{acknowledgment}\" о мероприятии <b>\"{event['title']}\"</b>",
+                parse_mode="HTML",
             )
         else:
             await message.answer(
-                f"{user['snp']} ничего не написал о мероприятии \"{event['title']}\""
+                f"{user['snp']}: {'спикер' if user_speech['role'] == '1' else 'гость'} ничего не написал о мероприятии <b>\"{event['title']}\"</b>",
+                parse_mode="HTML",
             )

@@ -1,6 +1,7 @@
 """Module to declare reminder."""
 
 from abc import ABC
+from time import time
 import tzlocal
 import asyncio
 from datetime import timedelta, datetime
@@ -16,21 +17,21 @@ from core.database.repositories.user_speech import UserSpeechRepository
 from core.database.repositories.user import UserRepository
 
 
-def serialize_timedelta(delta: timedelta, locale: str = 'ru_RU') -> str:
-    if locale != 'ru_RU':  # we only need russian, but who knows
-        raise ValueError(f'Unsupported locale {locale}')
-    delta_str = ':'.join(str(delta).split(':')[:2])
+def serialize_timedelta(delta: timedelta, locale: str = "ru_RU") -> str:
+    if locale != "ru_RU":  # we only need russian, but who knows
+        raise ValueError(f"Unsupported locale {locale}")
+    delta_str = ":".join(str(delta).split(":")[:2])
     days = delta.days
     if days != 0:
         td_str = delta_str.split()
         if days % 10 == 1:
-            day_str = 'день'
+            day_str = "день"
         elif 2 <= days % 10 <= 4:
-            day_str = 'дня'
+            day_str = "дня"
         else:
-            day_str = 'дней'
+            day_str = "дней"
         td_str[1] = day_str
-        delta_str = ' '.join(td_str)
+        delta_str = " ".join(td_str)
     return delta_str
 
 
@@ -75,32 +76,31 @@ class GuestReminder(BasicReminder):
 
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
         logger.debug(f"Adding notification for guest {self.chat_id} and {self.event}")
-        """scheduler.add_job(
+        scheduler.add_job(
             self.send_notification,
             "date",
-            run_date=self.event["start_time"] - timedelta(minutes=1),
+            run_date=self.event["start_time"] - timedelta(minutes=15),
             id=str(self.chat_id) + ":" + self.event["key"],
             args=[
                 dp,
             ],
         )
-        for job in scheduler.get_jobs():
+        """for job in scheduler.get_jobs():
             logger.debug(f"{job}")"""
-        loop = asyncio.get_event_loop()
+        """loop = asyncio.get_event_loop()
 
         when_to_call = (
             loop.time()
             + (self.event["start_time"] - timedelta(minutes=10) - datetime.now()).total_seconds()
         )
-        loop.call_at(when_to_call, self.callback, dp)
+        loop.call_at(when_to_call, self.callback, dp)"""
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         logger.debug(f"Removing notification for guest {self.chat_id} and {self.event}")
-        """try:
+        try:
             scheduler.remove_job(job_id=str(self.chat_id) + ":" + self.event["key"])
         except JobLookupError:
             pass
-        """
 
 
 class SpeakerReminder(BasicReminder):
@@ -141,104 +141,124 @@ class SpeakerReminder(BasicReminder):
 
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
         logger.debug(f"Adding notification for speaker {self.email} and {self.event}")
-        """scheduler.add_job(
+        scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(days=1),
-            id=str(self.chat_id) + ":" + self.event["key"] + ":" + "0",
+            id=str(self.email) + ":" + self.event["key"] + ":" + "0",
             args=[
                 dp,
             ],
-        )"""
+        )
+        """
         loop = asyncio.get_event_loop()
         when_to_call = (
             loop.time()
             + (self.event["start_time"] - timedelta(minutes=10) - datetime.now()).total_seconds()
         )
         loop.call_at(when_to_call, self.callback, dp)
-        """scheduler.add_job(
+        """
+        scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(hours=3),
-            id=str(self.chat_id) + ":" + self.event["key"] + ":" + "1",
+            id=str(self.email) + ":" + self.event["key"] + ":" + "1",
             args=[
                 dp,
             ],
-        )"""
+        )
+        """
         when_to_call = (
             loop.time()
             + (self.event["start_time"] - timedelta(hours=2) - datetime.now()).total_seconds()
         )
         loop.call_at(when_to_call, self.callback, dp)
-        """scheduler.add_job(
+        """
+        scheduler.add_job(
             self.send_notification,
             "date",
-            run_date=self.event["start_time"] - timedelta(minutes=10),
-            id=str(self.chat_id) + ":" + self.event["key"] + ":" + "2",
+            run_date=self.event["start_time"] - timedelta(minutes=15),
+            id=str(self.email) + ":" + self.event["key"] + ":" + "2",
             args=[
                 dp,
             ],
-        )"""
+        )
+        """
         when_to_call = (
             loop.time()
             + (self.event["start_time"] - timedelta(hours=2) - datetime.now()).total_seconds()
         )
         loop.call_at(when_to_call, self.callback, dp)
+        """
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         logger.debug(f"Removing notification for speakers {self.email} and {self.event}")
-        """for num in range(3):
+        for num in range(3):
             try:
                 scheduler.remove_job(
-                    job_id=str(self.chat_id) + ":" + self.event["key"] + ":" + str(num)
+                    job_id=str(self.email) + ":" + self.event["key"] + ":" + str(num)
                 )
             except JobLookupError:
-                pass"""
+                pass
 
 
 class ModeratorReminder(BasicReminder):
-    def __init__(self, chat_id, event):
-        self.chat_id = chat_id
+    def __init__(self, event):
         self.event = event
 
     async def send_notification(self, dp: Dispatcher):
-        logger.debug(f"Sending notification to {self.chat_id} about events")
+        logger.debug(f"Sending notification to moderators about events")
         session = SessionLocal()
+        user_repo = UserRepository(session)
+        moderators_list = await user_repo.get_all(is_admin=True)
         user_speech_repo = UserSpeechRepository(session)
-        user_speech_list = await user_speech_repo.get_all(role="1", key=self.event["key"])
-        for user_speech in user_speech_list:
-            user_repo = UserRepository(session)
-            user = await user_repo.get_one(uid=user_speech["uid"])
-            acknowledgment = user_speech["acknowledgment"]
-            if acknowledgment:
-                await dp.bot.send_message(
-                    self.chat_id, f"{user['snp']} написал: \"{acknowledgment}\" о мероприятии \"{self.event['title']}\""
-                )
-            else:
-                await dp.bot.send_message(
-                    self.chat_id, f"{user['snp']} ничего не написал о мероприятии \"{self.event['title']}\""
-                )
-
+        user_speech_list = await user_speech_repo.get_all(key=self.event["key"])
+        sorted(user_speech_list, key=lambda user_speech: (user_speech["role"], user_speech["uid"]))
+        # send data to several moderators
+        for moderator in moderators_list:
+            if moderator:
+                # send data to moderator
+                if moderator["tg_chat_id"]:
+                    await dp.bot.send_message(moderator["tg_chat_id"], "Ответы всех участников:")
+                    for user_speech in user_speech_list:
+                        user = await user_repo.get_one(uid=user_speech["uid"])
+                        acknowledgment = user_speech["acknowledgment"]
+                        if acknowledgment:
+                            await dp.bot.send_message(
+                                moderator["tg_chat_id"],
+                                f"{user['snp']}: {'спикер' if user_speech['role'] == '1' else 'гость'} написал: \"{acknowledgment}\" о мероприятии <b>\"{self.event['title']}\"</b>",
+                                parse_mode="HTML",
+                            )
+                        else:
+                            await dp.bot.send_message(
+                                moderator["tg_chat_id"],
+                                f"{user['snp']}: {'спикер' if user_speech['role'] == '1' else 'гость'} ничего не написал о мероприятии <b>\"{self.event['title']}\"</b>",
+                                parse_mode="HTML",
+                            )
+                else:
+                    logger.debug(f"No tg_chat_id for moderator {moderator}")
         await session.close()
 
     def callback(self, dp):
         asyncio.ensure_future(self.send_notification(dp))
 
     def add_notification(self, scheduler: AsyncIOScheduler, dp: Dispatcher):
-        """scheduler.add_job(
+        scheduler.add_job(
             self.send_notification,
             "date",
             run_date=self.event["start_time"] - timedelta(minutes=10),
             args=[
                 dp,
             ],
-        )"""
+        )
+        """
         loop = asyncio.get_event_loop()
         when_to_call = (
             loop.time()
             + (self.event["start_time"] - timedelta(minutes=5) - datetime.now()).total_seconds()
         )
         loop.call_at(when_to_call, self.callback, dp)
+        """
 
     def remove_notification(self, scheduler: AsyncIOScheduler):
         pass
@@ -254,10 +274,15 @@ class Scheduler:
             executors=config.executors,
             job_defaults=config.job_defaults,
         )"""
-        self.scheduler = None  # AsyncIOScheduler(timezone=tz, event_loop=asyncio.get_event_loop())
+        self.scheduler = AsyncIOScheduler(timezone=tz)  # event_loop=asyncio.get_event_loop())
         self.dp = dp
         # self.scheduler.start()
         logger.debug("Scheduler was initialized successfully")
+
+    def start(self):
+        logger.debug("Starting scheduler")
+        self.scheduler.start()
+        logger.debug("Scheduler started")
 
     def add_remind(self, reminder: BasicReminder):
         reminder.add_notification(self.scheduler, self.dp)

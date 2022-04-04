@@ -26,17 +26,21 @@ async def event_status_guest(message: types.Message, state: FSMContext):
     event_data = await state.get_data()
     clean_message = message.text.strip().lower()
     if "не пойду" in clean_message:
-        await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
+        await user_speech_repo.update(
+            uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
+        )
         await message.answer("Жаль:(")
         await state.set_state("guest_main")
     elif "пойду" in clean_message:
-        await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
+        await user_speech_repo.update(
+            uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
+        )
         await message.answer("Отлично:)")
         await state.reset_data()
         await state.set_state("guest_main")
     else:
         await message.answer(
-            'Не могу разобрать :(\nНапишите <b>пойду</b> или <b>не пойду</b>',
+            "Не могу разобрать :(\nНапишите <b>пойду</b> или <b>не пойду</b>",
             parse_mode="HTML",
         )
 
@@ -62,7 +66,8 @@ async def event_status_speaker(message: types.Message, state: FSMContext):
             if moderator["tg_chat_id"]:
                 await message.bot.send_message(
                     moderator["tg_chat_id"],
-                    f"{user['snp']} написал: \"{message.text}\" о мероприятии \"{event_data['title']}\"",
+                    f"Ответ спикера на уведомление. {user['snp']} написал: <b>\"{message.text}\"</b> о мероприятии <b>\"{event_data['title']}\"</b>",
+                    parse_mode="HTML",
                 )
             else:
                 logger.debug(f"No tg_chat_id for moderator {moderator}")
@@ -73,6 +78,8 @@ async def event_status_speaker(message: types.Message, state: FSMContext):
     else:
         await message.answer("Отлично :)")
     # update information
-    await user_speech_repo.update(uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text)
+    await user_speech_repo.update(
+        uid=user["uid"], key=event_data["key"], new_acknowledgment=message.text
+    )
     await state.reset_data()
     await state.set_state("guest_main")
