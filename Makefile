@@ -56,7 +56,7 @@ upload-testing: build-testing
 	docker push $(REGISTRY_IMAGE):testing
 
 prov-testing:
-	scp -r .env Makefile data/ docker-compose.* p301-test@preprod.conf.konstant-anxiety.ru:/home/p301-test/conf_app/
+	scp -r .env Makefile data/ docker-compose.preprod.yml p301-test@preprod.conf.konstant-anxiety.ru:/home/p301-test/conf_app/
 
 pull-testing:
 	sudo docker-compose -f docker-compose.preprod.yml pull
@@ -76,7 +76,7 @@ upload-prod: build-prod
 	docker push $(REGISTRY_IMAGE):latest
 
 prov-prod:
-	scp -r .env Makefile data/ docker-compose.* p301@conf.konstant-anxiety.ru:/home/p301-test/conf_app/
+	scp -r .env Makefile data/ docker-compose.prod.yml p301@conf.konstant-anxiety.ru:/home/p301-test/conf_app/
 
 pull-prod:
 	sudo docker-compose -f docker-compose.prod.yml pull
@@ -85,5 +85,4 @@ up-prod: pull-prod
 	sudo docker-compose -f docker-compose.prod.yml up --force-recreate --remove-orphans
 
 up-prod-d: pull-prod
-	sudo docker-compose -f docker-compose.prod.yml pull
 	sudo docker-compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans
