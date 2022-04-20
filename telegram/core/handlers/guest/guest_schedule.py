@@ -56,10 +56,11 @@ async def show_personal_schedule_today(message: types.Message):
                 starts_at=event["start_time"].strftime("%d-%m %H:%M"),
                 ends_at=event["end_time"].strftime("%d-%m %H:%M"),
                 venue=event["venue"],
-                venue_description=event["venue_description"],
             )
             await message.answer(
-                msg, reply_markup=all_keyboards["remove_event"](event["key"]), parse_mode="HTML"
+                msg,
+                reply_markup=all_keyboards["remove_event"](event["key"]),
+                parse_mode="HTML",
             )
     if not has_events:
         logger.debug(f"User {message.from_user.id} has not events for today")
@@ -99,7 +100,6 @@ async def show_personal_schedule_tomorrow(message: types.Message):
                 starts_at=event["start_time"].strftime("%d-%m %H:%M"),
                 ends_at=event["end_time"].strftime("%d-%m %H:%M"),
                 venue=event["venue"],
-                venue_description=event["venue_description"],
             )
             await message.answer(
                 msg,
@@ -142,10 +142,11 @@ async def show_personal_schedule_all(message: types.Message):
             starts_at=event["start_time"].strftime("%d-%m %H:%M"),
             ends_at=event["end_time"].strftime("%d-%m %H:%M"),
             venue=event["venue"],
-            venue_description=event["venue_description"],
         )
         await message.answer(
-            msg, reply_markup=all_keyboards["remove_event"](event["key"]), parse_mode="HTML"
+            msg,
+            reply_markup=all_keyboards["remove_event"](event["key"]),
+            parse_mode="HTML",
         )
     if not has_events:
         logger.debug(f"User {message.from_user.id} has not events")
@@ -183,10 +184,11 @@ async def show_personal_speech(message: types.Message):
             starts_at=event["start_time"].strftime("%d-%m %H:%M"),
             ends_at=event["end_time"].strftime("%d-%m %H:%M"),
             venue=event["venue"],
-            venue_description=event["venue_description"],
         )
         await message.answer(
-            msg, reply_markup=all_keyboards["remove_speaker"](event["key"]), parse_mode="HTML"
+            msg,
+            reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            parse_mode="HTML",
         )
     if not has_events:
         await message.answer("Мероприятий, где вы спикер, нет :(")

@@ -56,21 +56,35 @@ def kb_moderator_answers():
     return kb_guest
 
 
-def kb_add_event(id: str):
+# TODO we need some kind of builder class/function to avoid hacks like this (I don't have time for this right now)
+def add_show_desc_to_kb(kb: InlineKeyboardMarkup, id: str) -> None:
+    kb.add(InlineKeyboardButton(text="Подробнее", callback_data="show_desc:" + id))
+
+
+def kb_add_event(id: str) -> InlineKeyboardMarkup:
     kb_event = InlineKeyboardMarkup()
     kb_event.add(InlineKeyboardButton(text="Добавить", callback_data="add:" + id))
+    add_show_desc_to_kb(kb_event, id)
     return kb_event
 
 
-def kb_remove_event(id: str):
+def kb_show_event_description(id: str) -> InlineKeyboardMarkup:
+    kb_desc = InlineKeyboardMarkup()
+    add_show_desc_to_kb(kb_desc, id)
+    return kb_desc
+
+
+def kb_remove_event(id: str) -> InlineKeyboardMarkup:
     kb_event = InlineKeyboardMarkup()
     kb_event.add(InlineKeyboardButton(text="Убрать", callback_data="removeGuest:" + id))
+    add_show_desc_to_kb(kb_event, id)
     return kb_event
 
 
-def kb_remove_speaker(id: str):
+def kb_remove_speaker(id: str) -> InlineKeyboardMarkup:
     kb_speech = InlineKeyboardMarkup()
     kb_speech.add(InlineKeyboardButton(text="Отказаться", callback_data="removeSpeaker:" + id))
+    add_show_desc_to_kb(kb_speech, id)
     return kb_speech
 
 
@@ -79,6 +93,7 @@ all_keyboards["guest_personal_schedule"] = kb_guest_personal_schedule
 all_keyboards["moderator_menu"] = kb_moderator_menu
 all_keyboards["moderator_answers"] = kb_moderator_answers
 all_keyboards["add_event"] = kb_add_event
+all_keyboards["show_desc"] = kb_show_event_description
 all_keyboards["remove_event"] = kb_remove_event
 all_keyboards["remove_speaker"] = kb_remove_speaker
 all_keyboards["back_button"] = kb_go_back_button

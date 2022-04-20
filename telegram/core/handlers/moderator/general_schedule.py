@@ -6,6 +6,8 @@ from core.utils.messages import SCHEDULE_ENTRY_MESSAGE
 from core.database.create_table import SessionLocal
 from core.database.repositories.speech import SpeechRepository
 
+from core.keyboards.all_keyboards import all_keyboards
+
 
 async def general_schedule(message: types.Message, state: FSMContext):
     """
@@ -27,9 +29,8 @@ async def general_schedule(message: types.Message, state: FSMContext):
             starts_at=event["start_time"].strftime("%d-%m %H:%M"),
             ends_at=event["end_time"].strftime("%d-%m %H:%M"),
             venue=event["venue"],
-            venue_description=event["venue_description"],
         )
-        await message.answer(msg, parse_mode='HTML')
+        await message.answer(msg, parse_mode='HTML', reply_markup=all_keyboards['show_desc'](event['key']))
     if not has_events:
         await message.answer("Мероприятий нет :(")
     await session.close()

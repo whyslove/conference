@@ -108,6 +108,6 @@ async def commands(message: types.Message, state: FSMContext):
 
 async def base_handler(message: types.Message, state: FSMContext):
     await message.answer(
-        "К сможалению, ни один из обработчиков в данный момент не смог обработать ваше сообщение в текущем состоянии. \
+        "К сожалению, ни один из обработчиков в данный момент не смог обработать ваше сообщение в текущем состоянии. \
          Для того, чтобы сбросить состояние используйте команду /stop, а затем /start"
     )
