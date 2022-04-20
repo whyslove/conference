@@ -54,7 +54,7 @@ async def upload_xls(message: types.Message, state: FSMContext):
             event_list = await speech_repo.get_all()
             if event_list:
                 for event in event_list:
-                    reminder = ModeratorReminder(message.from_user.id, event)
+                    reminder = ModeratorReminder(event)
                     config.sc.add_remind(reminder)
                 logger.debug(f"Reminds for moderator {message.from_user} set successfully")
             else:

@@ -18,7 +18,7 @@ services:
   bot:
     container_name: conf_bot
     # build: .
-    image: registry.miem.hse.ru/301/conference/telegram:latest
+    image: registry.miem.hse.ru/301/conference/telegram:testing
     environment:
       TZ: "Europe/Moscow"
     env_file:
@@ -35,7 +35,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./data/nginx/prod:/etc/nginx/conf.d
+      - ./data/nginx/preprod:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"

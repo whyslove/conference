@@ -5,7 +5,7 @@ from aiogram import types, Dispatcher, Bot
 from fastapi import FastAPI
 
 from core.config import config
-from core.config import bot, dp
+from core.config import bot, dp, sc
 from core import handlers
 from core import filters
 
@@ -24,7 +24,7 @@ async def on_startup():
     await bot.set_webhook(url=config.WEBHOOK_URL + WEBHOK_PATH)
     filters.setup(dp)
     handlers.setup(dp)
-
+    sc.scheduler.start()
     from core.routes import router
 
     app.include_router(router)

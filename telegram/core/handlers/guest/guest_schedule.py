@@ -21,7 +21,7 @@ async def personal_schedule(message: types.Message):
     logger.debug(f"In personal schedule for guest {message.from_user}")
     await message.answer(
         "Выберите опцию. Для навигации используйте кнопки.",
-        reply_markup=all_keyboards["guest_personal_schedule"]()
+        reply_markup=all_keyboards["guest_personal_schedule"](),
     )
 
 
@@ -59,8 +59,8 @@ async def show_personal_schedule_today(message: types.Message):
             )
             await message.answer(
                 msg,
-                reply_markup=all_keyboards['show_desc'](event['key']),
-                parse_mode='HTML'
+                reply_markup=all_keyboards["remove_event"](event["key"]),
+                parse_mode="HTML",
             )
     if not has_events:
         logger.debug(f"User {message.from_user.id} has not events for today")
@@ -103,9 +103,8 @@ async def show_personal_schedule_tomorrow(message: types.Message):
             )
             await message.answer(
                 msg,
-                reply_markup=all_keyboards['show_desc'](event['key']),
-                # reply_markup=all_keyboards["remove_event"](event["key"]),
-                parse_mode='HTML',
+                reply_markup=all_keyboards["remove_event"](event["key"]),
+                parse_mode="HTML",
             )
     if not has_events:
         logger.debug(f"User {message.from_user.id} has not events for tomorrow")
@@ -146,9 +145,8 @@ async def show_personal_schedule_all(message: types.Message):
         )
         await message.answer(
             msg,
-            reply_markup=all_keyboards['show_desc'](event['key']),
-            # reply_markup=all_keyboards["remove_event"](event["key"]),
-            parse_mode='HTML'
+            reply_markup=all_keyboards["remove_event"](event["key"]),
+            parse_mode="HTML",
         )
     if not has_events:
         logger.debug(f"User {message.from_user.id} has not events")
@@ -189,9 +187,8 @@ async def show_personal_speech(message: types.Message):
         )
         await message.answer(
             msg,
-            reply_markup=all_keyboards['show_desc'](event['key']),
-            # reply_markup=all_keyboards["remove_event"](event["key"]),
-            parse_mode='HTML'
+            reply_markup=all_keyboards["remove_speaker"](event["key"]),
+            parse_mode="HTML",
         )
     if not has_events:
         await message.answer("Мероприятий, где вы спикер, нет :(")
