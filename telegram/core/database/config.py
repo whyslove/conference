@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     class Config:
         # env_prefix = 'ONLINEEDU_'
         # uncomment when testing locally
-        env_file = ".env"
+        env_file = "./core/database/.env"
+        # env_file = ".env"
         # env_file_encoding = 'utf-8'
 
 

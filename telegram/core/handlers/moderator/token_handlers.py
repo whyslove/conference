@@ -4,6 +4,7 @@ from core.database.repositories import token, user
 from core.database.create_table import SessionLocal
 from core.utils.utils import reset_base_state
 from core.keyboards.all_keyboards import all_keyboards
+from validate_email import validate_email
 from loguru import logger
 
 
@@ -32,6 +33,9 @@ async def use_token(message: types.Message, state: FSMContext):
 
 async def enter_email_for_token(message: types.Message, state: FSMContext):
     email = message.text.rstrip().lstrip().lower()
+    if not validate_email(email_address=email, check_smtp=False, check_dns=False):
+        await message.answer("Некорректный email. Введите его ещё раз")
+        return
     logger.debug(f"Get {email=}, try update")
 
     ur = user.UserRepository(session=SessionLocal())
@@ -48,8 +52,6 @@ async def enter_email_for_token(message: types.Message, state: FSMContext):
         )
         await state.set_state("enter_snp_for_token")
         await state.set_data({"email": email})
-    # await message.answer("Вы стали модератором")
-    # await message.answer("Вот меню", reply_markup=all_keyboards["moderator_menu"]())
 
     await ur.session.close()
 

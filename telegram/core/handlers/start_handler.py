@@ -91,10 +91,13 @@ async def commands(message: types.Message, state: FSMContext):
             _user = await ur.get_one(tg_chat_id=message.from_user.id)
             if not _user:
                 await message.answer("Для начала работы введите свою почту")
+                await state.set_state("need_enter_email")
             elif _user["is_admin"]:
                 await message.answer("Показ меню", reply_markup=all_keyboards["moderator_menu"]())
+                await state.set_state("moderator_main")
             else:
                 await message.answer("Показ меню", reply_markup=all_keyboards["guest_menu"]())
+                await state.set_state("guest_main")
             await ur.session.close()
         case "help":
             await message.answer(

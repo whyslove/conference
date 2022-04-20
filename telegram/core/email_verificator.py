@@ -91,10 +91,11 @@ class EmailVerificator:
         Returns:
             bool: is verification was ok or not
         """
-        email, chat_id = await self.verify_token(token)
 
+        email, chat_id = await self.verify_token(token)
         logger.debug(f"get from redis {email=}, {chat_id=}")
         chat_id = int(chat_id)
+
         if not email or not chat_id:
             return False
 
@@ -143,13 +144,19 @@ class EmailVerificator:
             )
 
 
-email_verificator = EmailVerificator(
-    bot=bot,
-    dispatcher=dp,
-    redis=redis,
-    smtp_host=config.SMTP_HOST,
-    smtp_port=config.SMTP_PORT,
-    smtp_user=config.SMTP_USER,
-    smtp_password=config.SMTP_PASSWORD,
-    verification_endpoint_url=config.VERIFICATION_URL,
-)
+email_verificator = None
+if config.TESTING:
+    from unittest.mock import AsyncMock
+
+    email_verificator = AsyncMock()
+else:
+    email_verificator = EmailVerificator(
+        bot=bot,
+        dispatcher=dp,
+        redis=redis,
+        smtp_host=config.SMTP_HOST,
+        smtp_port=config.SMTP_PORT,
+        smtp_user=config.SMTP_USER,
+        smtp_password=config.SMTP_PASSWORD,
+        verification_endpoint_url=config.VERIFICATION_URL,
+    )

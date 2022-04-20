@@ -19,9 +19,11 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASSWORD: str
     VERIFICATION_URL: str
+    TESTING: int
 
     class Config:
-        env_file = "./telegram/.env"
+        # env_file = "./telegram/.env"
+        env_file = "../.env"
 
 
 config = Settings()

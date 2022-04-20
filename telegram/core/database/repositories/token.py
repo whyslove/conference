@@ -141,18 +141,18 @@ class TokenRepository:
                     f"Unable to add new token " f'because a parameter "token" does not exist.'
                 )
 
-            if "uid" in token.keys():
-                if token["uid"] not in uids:
-                    raise ValueError(
-                        f"Unable to add new token "
-                        f"because user with this "
-                        f'uid="{token["uid"]}" does not exist'
-                    )
-                params["uid"] = token["uid"]
-            else:
-                raise ValueError(
-                    f"Unable to add new token " f'because a parameter "uid" does not exist.'
-                )
+            # if "uid" in token.keys():
+            #     if token["uid"] not in uids:
+            #         raise ValueError(
+            #             f"Unable to add new token "
+            #             f"because user with this "
+            #             f'uid="{token["uid"]}" does not exist'
+            #         )
+            #     params["uid"] = token["uid"]
+            # else:
+            #     raise ValueError(
+            #         f"Unable to add new token " f'because a parameter "uid" does not exist.'
+            #     )
 
             if "vacant" in token.keys():
                 params["vacant"] = token["vacant"]
