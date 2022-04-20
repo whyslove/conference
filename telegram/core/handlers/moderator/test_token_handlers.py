@@ -8,6 +8,8 @@ from .token_handlers import (
     enter_phone_for_token,
 )
 from core.keyboards.all_keyboards import all_keyboards
+from core.database.repositories import user
+from core.database.create_table import SessionLocal
 
 
 @pytest.mark.asyncio
@@ -92,43 +94,68 @@ async def test_enter_existing_email_for_token(use_test_guest):
 
 
 @pytest.mark.asyncio
-async def test_full_creation_of_new_user():
-    # It looks like an integrational test. Because we have four functions, that get info
-    # from user and store it in the local storage.
-    # so it it is very hard to write unittest to it
-    message_correct1 = (
-        "Ваша почта не была найдена в базе. Продолжите создание аккаунта. Введите ФИО"
-    )
-    message_correct2 = "Введите ваш телефон"
-    message_correct3 = "Вы получили права модераторa"
-    state_correct1 = "enter_snp_for_token"
-    state_correct2 = "enter_phone_for_token"
-    state_correct3 = "moderator_main"
-
-    kb_correct = all_keyboards["moderator_menu"]()
-
-    email = "testuser3@gmail.com"
-    snp = "Test testovich"
-    phone = "89057342781"
+async def test_enter_new_emain_for_token():
+    email = "newnewemail@gmail.com"
+    message_correct = "Ваша почта не была найдена в базе. Продолжите создание аккаунта. Введите ФИО"
+    state_correct = "enter_snp_for_token"
+    data_correct = {"email": email}
 
     message = AsyncMock(text=email)
     state = AsyncMock()
-
     await enter_email_for_token(message, state)
 
-    message.answer.assert_called_with(message_correct1)
-    state.set_state.assert_called_with(state_correct1)
+    message.answer.assert_called_with(message_correct)
+    state.set_state.assert_called_with(state_correct)
+    state.set_data.assert_called_with(data_correct)
 
+
+@pytest.mark.asyncio
+async def test_enter_snp_for_token():
+    # email from prev test
+    email = "newnewemail@gmail.com"
+    snp = "mysnp"
+    message_correct = "Введите ваш телефон"
+    state_correct = "enter_phone_for_token"
     message = AsyncMock(text=snp)
     state = AsyncMock()
+
+    async def get_data(default):
+        return {"email": email}
+
+    state.get_data = get_data
     await enter_snp_for_token(message, state)
 
-    message.answer.assert_called_with(message_correct2)
-    state.set_state.assert_called_with(state_correct2)
+    message.answer.assert_called_with(message_correct)
+    state.set_state.assert_called_with(state_correct)
+    state.update_data.assert_called_with(data={"email": email, "snp": snp})
 
-    message = AsyncMock(text=phone, from_user=AsyncMock(id=345678))
+
+@pytest.mark.asyncio
+async def test_enter_phone_for_token():
+    # email and snp from prev test
+    email = "newnewemail@gmail.com"
+    snp = "mysnp"
+    phone = "+79057342891"
+    tg_chat_id = 456789
+    message_correct = "Вы получили права модераторa"
+    state_correct = "moderator_main"
+    kb_correct = all_keyboards["moderator_menu"]()
+
+    message = AsyncMock(text=phone, from_user=AsyncMock(id=tg_chat_id))
     state = AsyncMock()
-    await enter_phone_for_token(message, state)
 
-    message.answer.assert_called_with(message_correct3, reply_markup=kb_correct)
-    state.set_state.assert_called_with(state_correct3)
+    async def get_data(default):
+        return {"email": email, "snp": snp}
+
+    state.get_data = get_data
+
+    await enter_phone_for_token(message, state)
+    message.answer.assert_called_with(message_correct, reply_markup=kb_correct)
+    state.set_state_assert_called_with(state_correct)
+
+    ur = user.UserRepository(session=SessionLocal())
+    assert (
+        await ur.get_one(uid=email, snp=snp, phone=phone, tg_chat_id=tg_chat_id, is_admin=True)
+        is not None
+    )
+    ur.session.close()

@@ -16,3 +16,5 @@ phonenumbers
 aiosmtplib
 jinja2
 aioredis
+pytest
+pytest_asyncio
