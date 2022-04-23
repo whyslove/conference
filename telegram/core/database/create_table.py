@@ -139,9 +139,12 @@ class Token(Base):
 async def update_tables(dev=False):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        await conn.execute(
-            text("insert into token values ('tok', true)")
-        )
+        try:
+            await conn.execute(
+                text("insert into token values ('tok', true)")
+            )
+        except Exception:  # noqa
+            print('Token is there already')
 
     if dev:
         from tests.test_all import TestBase
