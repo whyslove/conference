@@ -15,9 +15,19 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6370:6379'
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+    restart: unless-stopped
+
   bot:
     container_name: conf_bot
-    build: .
+    image: registry.miem.hse.ru/301/conference/telegram:local
     environment:
       TZ: "Europe/Moscow"
     env_file:
@@ -27,3 +37,15 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
+
+  nginx:
+    container_name: nginx-conf
+    image: nginx:1.21-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/nginx/local:/etc/nginx/conf.d
+    depends_on:
+      - bot

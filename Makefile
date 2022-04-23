@@ -9,6 +9,11 @@ all:
 # 	@echo "make lint               - Check code with pylama"
 # 	@echo "make test               - Run tests"
 # 	@echo "make cov                - Run tests and generate coverage html report"
+	@echo "=== LOCAL ==="
+	@echo "    make build-local      - Build a local docker image"
+	@echo "    make up-local         - Start app locally"
+	@echo "    make up-local-d       - Start app locally and detach"
+	@echo ""
 	@echo "=== TESTING ==="
 	@echo "    make build-testing      - Build a docker image with tag 'testing'"
 	@echo "    make upload-testing     - Build and upload a docker image with tag 'testing' to the registry"
@@ -47,6 +52,18 @@ clean:
 #
 # cov: test
 # 	coverage html
+
+
+# LOCAL
+build-local:
+	docker build -t $(REGISTRY_IMAGE):local .
+
+up-local: build-local
+	docker-compose -f docker-compose.local.yml up --force-recreate --remove-orphans
+
+up-local-d: build-local
+	docker-compose -f docker-compose.local.yml up -d --force-recreate --remove-orphans
+
 
 # TESTING
 build-testing:
