@@ -61,6 +61,11 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
         except MyValidationError as exp:
             logger.info(f"Ошибка от пользователя {exp}")
             return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. {str(exp)}"
+        except Exception as exp:
+            logger.error(
+                f"Неожиданная ошибка от пользователя при заполнения конфига {exp}. Изначальная строчка {row}"
+            )
+            return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. {str(exp)}"
         if not email or not fio or not phone:
             return f"Произошла ошибка при обработке листа 'Участники', в строке {row_number}. Одна из колонок пуста"
         try:
@@ -97,25 +102,41 @@ async def parse_xlsx(full_path: str, admin_tg_id: str):
             return (
                 f"Произошла ошибка при обработке листа 'События', в строке {row_number}. {str(exp)}"
             )
+        except Exception as exp:
+            logger.error(
+                f"Неожиданная ошибка от пользователя при заполнения конфига {exp}. Изначальная строчка {row}"
+            )
+            return (
+                f"Произошла ошибка при обработке листа 'События', в строке {row_number}. {str(exp)}"
+            )
         if not title or not speakers or not start or not end or not place:
             return f"Произошла ошибка при обработке листа 'События', в строке {row_number}. Одна из колонок пуста"
-        desc_lines = desc_place.split('\n')
-        desc_content = [{'tag': 'p', 'children': [line]} for line in desc_lines]
-        desc_content = json.dumps(desc_content)
-        params = {
-            'access_token': config.TELEGRAPH_TOKEN,
-            'title': title,
-            'author_name': 'Olamia',
-            'author_url': 'https://t.me/olamiaconfbot',
-            'content': desc_content,
+        desc_place = (
+            (desc_place[:8000] + "...") if len(desc_place) > 8000 else desc_place
+        )  # truncate long strings
+        desc_lines = desc_place.split("\n")
+        data = {
+            "access_token": config.TELEGRAPH_TOKEN,
+            "title": title,
+            "author_name": "Olamia",
+            "author_url": "https://t.me/olamiaconfbot",
+            "content": json.dumps([{"tag": "p", "children": [line]} for line in desc_lines]),
         }
-        async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
-            response = await client.get('https://api.telegra.ph/createPage', params=params)
+        try:
+            async with httpx.AsyncClient() as client:  # TODO Telegraph timeout
+                response = await client.post("https://api.telegra.ph/createPage", data=data)
+        except httpx.RequestError:
+            return f"Не удалось загрузить описание для строки {row_number}. Нет доступа к Telegraph"
+        if response.status_code != httpx.codes.OK:
+            logger.error(response)
+            return f"Не удалось загрузить описание для строки {row_number}. Ответ {response.status_code}"
         resp_json = response.json()
-        if resp_json['ok']:
-            desc_link = response.json()['result']['url']
+        if resp_json["ok"]:
+            desc_link = response.json()["result"]["url"]
         else:
-            desc_link = desc_place
+            logger.error(json.dumps(resp_json))
+            logger.error(data["content"])
+            return f"Не удалось загрузить описание для строки {row_number}"
         try:
             if (title, start) in old_db_events:
                 # I use combination of title and start_time to uniquely identify one record
@@ -208,6 +229,8 @@ def process_members_row(row):
         email, fio, phone, is_admin
     """
     email, fio, phone, is_admin, *_ = row  # *_ to store blank cells
+    if not email or not fio or not phone or is_admin is None:
+        raise MyValidationError("Одна из колонок пуста")
     email = email.rstrip().lstrip().lower()
     fio = fio.rstrip().lstrip()
     phone = phone.rstrip().lstrip()
@@ -230,6 +253,8 @@ def process_events_row(row):
         title: str, speakers: list, start: datetime, end: datetime, place: str, desc_place: str
     """
     title, speakers, start, end, place, desc_place, *_ = row  # *_ to store blank rows
+    if not title or not speakers or not start or not end or not place or not desc_place:
+        raise MyValidationError("Одна из колонок пуста")
     title = title.rstrip().lstrip()
     speakers = [
         speaker.rstrip().lstrip().lower() for speaker in speakers.split(";")

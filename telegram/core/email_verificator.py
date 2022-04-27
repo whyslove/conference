@@ -91,8 +91,9 @@ class EmailVerificator:
         Returns:
             bool: is verification was ok or not
         """
-
         email, chat_id = await self.verify_token(token)
+        if not email or not chat_id:
+            return False
         logger.debug(f"get from redis {email=}, {chat_id=}")
         chat_id = int(chat_id)
 

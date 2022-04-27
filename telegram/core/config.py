@@ -43,6 +43,6 @@ jinja_env = Environment(
 # }
 # jobstores = {"default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")}
 # executors = {"default": ThreadPoolExecutor(10)}
-redis = aioredis.from_url("redis://localhost", decode_responses=True)  # lazy?
+redis = aioredis.from_url("redis://redis", decode_responses=True)  # lazy?
 job_defaults = {"coalesce": False, "max_instances": 5}
 sc = Scheduler(dp)

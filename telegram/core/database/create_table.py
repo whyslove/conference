@@ -1,5 +1,6 @@
 import asyncio
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio.engine import create_async_engine
 from sqlalchemy.sql.sqltypes import String, Boolean, BigInteger, DateTime
 from sqlalchemy.sql.schema import Column, ForeignKey, MetaData
@@ -138,6 +139,12 @@ class Token(Base):
 async def update_tables(dev=False):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            await conn.execute(
+                text("insert into token values ('tok', true)")
+            )
+        except Exception:  # noqa
+            print('Token is there already')
 
     if dev:
         from tests.test_all import TestBase

@@ -1,0 +1,61 @@
+version: '3.7'
+
+services:
+  postgres:
+    container_name: conf_pg
+    image: postgres
+    environment:
+      TZ: "Europe/Moscow"
+      POSTGRES_USER: conf_user
+      POSTGRES_PASSWORD: conf_pass
+      POSTGRES_DB: conf_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6370:6379'
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+    restart: unless-stopped
+
+  bot:
+    container_name: conf_bot
+    # build: .
+    image: registry.miem.hse.ru/301/conference/telegram:testing
+    environment:
+      TZ: "Europe/Moscow"
+    env_file:
+      - ./.env
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  nginx:
+    image: nginx:1.15-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/nginx/preprod:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    restart: unless-stopped
+    depends_on:
+      - bot
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
