@@ -264,6 +264,8 @@ def process_events_row(row):
         end = datetime.strptime(end.rstrip().lstrip(), "%Y-%m-%d %H:%M:%S")
     except ValueError:
         raise MyValidationError("Неправильно сформирована дата")
+    if end < start:
+        raise MyValidationError("Дата конца меньше даты начала")
     place = place.rstrip().lstrip()
     desc_place = desc_place.rstrip().lstrip()
     return title, speakers, start, end, place, desc_place
