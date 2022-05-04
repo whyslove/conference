@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock
 
 
 import pytest
+from aiogram.types.reply_keyboard import ReplyKeyboardRemove
 from core.keyboards.all_keyboards import all_keyboards
 from .start_handler import ask_email, check_email, commands
 
@@ -102,7 +103,9 @@ async def test_start_stop_hekp_commands():
     state_mock = AsyncMock()
     await commands(message=message_mock, state=state_mock)
 
-    message_mock.answer.assert_called_with(message_answer_correct)
+    message_mock.answer.assert_called_with(
+        message_answer_correct, reply_markup=ReplyKeyboardRemove()
+    )
     state_mock.set_state.called_with(state_correct)
 
     # /stop
@@ -111,7 +114,9 @@ async def test_start_stop_hekp_commands():
     state_mock = AsyncMock()
     await commands(message=message_mock, state=state_mock)
 
-    message_mock.answer.assert_called_with(message_answer_correct)
+    message_mock.answer.assert_called_with(
+        message_answer_correct, reply_markup=ReplyKeyboardRemove()
+    )
     state_mock.reset_data.assert_called_with()
     state_mock.reset_state.assert_called_with()
 
